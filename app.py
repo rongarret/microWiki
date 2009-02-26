@@ -1,4 +1,4 @@
-
+import config
 from wrappers import standard_wrap, tlp_wrap
 from selector import Selector
 from html import *
@@ -14,7 +14,7 @@ import wrappers
 
 def style(thing):
   return [str(as_html(thing))]
-#  return [unicode(as_html(thing)).encode('latin-1')]
+#  return [unicode(as_html(thing)).encode(config.unicode_encoding)]
 
 wrappers.style = style
 
@@ -38,8 +38,8 @@ md_pages = { 'Start': helptext }
 html_pages = {}
 
 from fdict import fdict
-md_pages = fdict('content/md')
-html_pages = fdict('content/html')
+md_pages = fdict(config.md_content_root)
+html_pages = fdict(config.html_content_root)
 
 def static(req):
   return HTMLString(open(req.environ['selector.vars']['file']).read())
@@ -68,8 +68,8 @@ def edit(req):
 def post(req):
   name = req.environ['selector.vars']['page']
   md = getformslot('content')
-  umd = unicode(md, 'latin-1')
+  umd = unicode(md, config.unicode_encoding)
   md_pages[name] = md
   c = markdown.markdown(umd, ['wikilink(base_url=,end_url=)'])
-  html_pages[name] = c.encode('latin-1')
+  html_pages[name] = c.encode(config.unicode_encoding)
   return req.redirect('/view/%s' % name)

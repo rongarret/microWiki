@@ -1,4 +1,10 @@
-import os, codecs
+import os, filecmp, codecs
+from glob import glob
+
+'''
+A dictionary-like class with a file-based backing store and simlpe revision
+tracking.
+'''
 
 class fdict(dict):
 
@@ -15,16 +21,35 @@ class fdict(dict):
   def get(self, key):
     return self[key] if self.has_key(key) else None
   
+  def store(self, path, content):
+#    codecs.open(path, encoding='utf-8', mode='w').write(content)
+    open(path, 'w').write(content)
+    pass
+  
+  def revise(self, key, content):
+    f1 = self.path(key)
+    try:
+      size = os.stat(f1).st_size
+    except OSError:
+      self.store(f1, content)  # File doesn't exist, create it
+      return
+    # Don't revise if content unchanged
+    if size == len(content) and open(f1).read() == content: return
+    # Get the next revision number
+    i = max([int(p.split('~')[1]) for p in glob('%s~*' % f1)] or [0])
+    os.rename(f1, self.path('%s~%s' % (key, i+1)))
+    self.store(f1, content)
+    pass
+  
   def __getitem__(self, key):
     if not dict.has_key(self, key):
-#      self[key] = codecs.open(self.path(key), encoding='latin-1').read()
+#      self[key] = codecs.open(self.path(key), encoding='utf-8').read()
       self[key]=open(self.path(key)).read()
       pass
     return dict.__getitem__(self, key)
 
   def __setitem__(self, key, content):
     dict.__setitem__(self, key, content)
-#    codecs.open(self.path(key), encoding='latin-1', mode='w').write(content)
-    open(self.path(key), 'w').write(content)
+    self.revise(key, content)
     pass
   pass

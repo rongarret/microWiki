@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+<title>uWiki</title>
+
+<script type="text/javascript" src="showdown.js"></script>
+<script type="text/javascript" src="uWiki.js"></script>
+
+<style type=text/css>
+
+  body { font-family: sans-serif; }
+  
+  table {
+    border: 1px solid black;
+    border-collapse: collapse;
+    background-color: #f7eeee;
+  }
+  
+  table td { border: solid 1px gray; padding: 10px; }
+  
+  #outputPane { background-color: #f7eeee; }
+  #syntaxPane { background-color: #f7eeee; }
+  #previewPane { border: solid 1px blue; overflow: auto; }
+  #previewPane > * { margin-left: 4px; margin-right: 4px; }
+  #previewPane > blockquote { margin-left: 3em; }
+  #previewPane > :first-child { margin-top: 4px; }
+ 
+</style>
+
+</head>
+
+<body>
+
+    <h1>MicroWiki</h1>
+
+<table><tr><td width=50% valign=top>
+
+      <h2>Input:</h2>
+
+    <form action=# method=get>
+      <textarea name="text" id="inputPane" cols="70" rows="20" class="pane">
+# Title
+
+Content goes here.
+</textarea>
+<br>
+      <input type=submit name=submit value="Save" />
+      
+    </form>
+
+    <td width=50% valign=top>
+      <select id="paneSetting">
+	<option value="previewPane">Preview</option>
+	<option value="outputPane">HTML Output</option>
+	<option value="syntaxPane">Syntax Guide</option>
+      </select>
+    
+    <textarea id="outputPane" class="pane" cols="70" rows="20" readonly="readonly">Output</textarea>
+
+    <div id="rightContainer">
+    <div id="previewPane" class="pane"><noscript><h2>You'll need to enable Javascript to use this tool.</h2></noscript>
+Preview
+    </div></div>
+    
+    <textarea id="syntaxPane" class="pane" cols="70" rows="20" readonly="readonly">[Help text goes here]</textarea>
+
+
+    <button id="convertTextButton" type="button" title="Convert text now">
+      Convert text
+    </button>
+    
+    <select id="convertTextSetting">
+      <option value="delayed">in the background</option>
+      <option value="continuous">every keystroke</option>
+      <option value="manual">manually</option>
+    </select>
+
+    <span id="processingTime" title="Last processing time">0 ms</span>
+
+</table>
+
+<!-- Don't delete the footer.  The resizing code relies on it. -->
+<div id=footer>
+
+</div>
+  
+</body>
+</html>

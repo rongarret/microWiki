@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+<title>uWiki</title>
+
+<script type="text/javascript" src="%(spath)s/showdown.js"></script>
+<script type="text/javascript" src="%(spath)s/uWiki.js"></script>
+
+<link rel="stylesheet" type="text/css" href="%(spath)s/uwiki.css"></link>
+
+</head>
+
+<body>
+
+  <h1 class="uwiki center">&micro;Wiki</h1>
+
+  <table class=center>
+    <tr>
+      <td valign=top>
+	
+	<h2 class=uwiki>Input:</h2>
+	
+	<form action=/post/%(name)s method=POST>
+	  <textarea name="content" id="inputPane" cols="70"
+		    rows="20">%(md_content)s</textarea>
+	  <br />
+	  <input type=submit name=submit value="Save" />
+
+	</form>
+      </td>
+      <td valign=top>
+
+	<ul class="tabnav">
+	  <li><a class='selected' href="#" onClick="selectTab(this, 'previewPane')">
+	      Preview</a></li>
+	  <li><a href="#" onClick="selectTab(this, 'outputPane')">
+	      HTML Output</a></li>
+	  <li><a href="#" onClick="selectTab(this, 'syntaxPane')">
+	      Syntax reference</a></li>
+	</ul>
+
+	<div id=display>	
+	  <div id="previewPane">
+	    <noscript><h2>
+		You will need to enable Javascript to use this tool.
+	    </h2></noscript>
+	    Preview
+	  </div>
+	  
+	  <textarea id="outputPane" cols="70" rows="20" readonly="readonly">
+	    HTML Output
+	  </textarea>
+	  
+	  <textarea id="syntaxPane" cols="70" rows="20" readonly="readonly">
+	    %(helptext)s
+	  </textarea>
+	</div>	
+	<button id="convertTextButton" type="button" title="Convert text">
+	  Convert text
+	</button>
+	
+	<select id="convertTextSetting">
+	  <option value="delayed">in the background</option>
+	  <option value="continuous">every keystroke</option>
+	  <option value="manual">manually</option>
+	</select>
+	
+	<span id="processingTime" title="Last processing time">0 ms</span>
+	
+      </td>
+    </tr>
+  </table>
+
+  <!-- Don't delete the footer.  The resizing code depends on it. -->
+  <div id=footer class=center>
+    <span class=copyright>
+      Copyright (c) 2008 by Ron Garret, all rights reserved.
+    </span>
+  </div>
+
+</body>
+</html>

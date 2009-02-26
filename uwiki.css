@@ -1,0 +1,66 @@
+
+body { font-family: sans-serif; }
+
+.center { margin: auto; text-align:center; }
+
+table {
+  border: 1px solid black;
+  border-collapse: collapse;
+  background-color: #f7eeee;
+}
+
+table td { border: solid 1px gray; padding: 10px; }
+
+h1.uwiki { color: #666; margin: auto; }
+h2.uwiki { color: #666; display:inline; }
+.copyright { color: #999; font-size: x-small; }
+
+#outputPane { background-color: #f7eeee; }
+#syntaxPane { background-color: #f7eeee; }
+#previewPane {
+    font-family: Helvetica, Arial, Verdana, sans-serif;
+    font-size: 90%%;
+    border: solid 1px black;
+    width: 40em;
+    overflow: auto;
+    text-align:left;
+}
+#previewPane > * { margin-left: 4px; margin-right: 4px; }
+#previewPane > :first-child { margin-top: 4px; }
+#previewPane > blockquote { margin-left: 3em; }
+#previewPane code { font-size: 1.3em; }
+
+
+/* Tabs */
+
+ul.tabnav { /* general settings */
+  text-align: left; /* set to left, right or center */
+  margin: 1em 0 0 0; /* set margins as desired */
+  font: bold 11px verdana, arial, sans-serif; /* set font as desired */
+  list-style-type: none;
+  padding: 3px 10px 3px 10px; /* THIRD number must change with respect to padding-top (X) below */
+}
+
+ul.tabnav li { display: inline; }
+
+ul.tabnav li a { /* settings for all tab links */
+padding: 3px 4px; /* set padding (tab size) as desired; FIRST number must change with respect to padding-top (X) above */
+border: 1px solid black; /* set border COLOR as desired; usually matches border color specified in #tabnav */
+background-color: #ecc; /* set unselected tab background color as desired */
+color: #666; /* set unselected tab link color as desired */
+margin-right: 0px; /* set additional spacing between tabs as desired */
+text-decoration: none;
+border-bottom: none;
+}
+
+ul.tabnav a:hover {
+  background: #f7eeee;
+}
+
+ul.tabnav li a.selected {
+ background-color: #f7eeee;
+ color: #333;
+ position: relative;
+ top: 1px;
+ padding-top: 4px; /* must change with respect to padding (X) above and below */
+}

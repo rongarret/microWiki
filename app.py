@@ -14,7 +14,7 @@ import wrappers
 
 def style(thing):
   return [str(as_html(thing))]
-#  return [unicode(as_html(thing)).encode(config.unicode_encoding)]
+#  return [unicode(as_html(thing)).decode(config.unicode_encoding)]
 
 wrappers.style = style
 
@@ -33,6 +33,7 @@ def init():
 template = open('uWiki.template').read()
 spath = '/static'
 helptext = open('markdown-ref.txt').read()
+content_type_header = 'text/html; charset=' + config.unicode_encoding
 
 md_pages = { 'Start': helptext }
 html_pages = {}
@@ -52,14 +53,19 @@ def generate_html(md):
   return html.encode(config.unicode_encoding)
 
 def view(req):
-  req.res.headers['Content-type']='text/html'
+  req.res.headers['Content-type'] = content_type_header
   name = req.environ['selector.vars']['page']
   md = md_pages.get(name)
   if md:
     return HTMLItems(link(H2('Edit'), '/edit/%s' % name), HR,
                      HTMLString(generate_html(md)))
   else:
-    return HTMLItems('Page not found. ', link('Create it', '/edit/%s' % name))
+    # Page not found
+    l = [name, ' not found. ', link('Create it', '/edit/%s' % name)]
+    r = req.environ.get('HTTP_REFERER') or req.environ.get('HTTP_REFERRER')
+    if r: l.append(HTMLItems(' or ', link('cancel', r)))
+    return HTMLItems(*l)
+  pass
 
 def edit(req):
   req.res.headers['Content-type']='text/html'

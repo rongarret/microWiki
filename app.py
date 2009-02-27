@@ -38,8 +38,7 @@ md_pages = { 'Start': helptext }
 html_pages = {}
 
 from fdict import fdict
-md_pages = fdict(config.md_content_root)
-html_pages = fdict(config.html_content_root)
+md_pages = fdict(config.content_root)
 
 def static(req):
   return HTMLString(open(req.environ['selector.vars']['file']).read())
@@ -47,13 +46,18 @@ def static(req):
 def start(req):
   req.redirect('/view/Start')
 
+def generate_html(md):
+  umd = unicode(md, config.unicode_encoding)
+  html = markdown.markdown(umd, ['wikilink(base_url=,end_url=)'])
+  return html.encode(config.unicode_encoding)
+
 def view(req):
   req.res.headers['Content-type']='text/html'
   name = req.environ['selector.vars']['page']
-  content = html_pages.get(name)
-  if content:
+  md = md_pages.get(name)
+  if md:
     return HTMLItems(link(H2('Edit'), '/edit/%s' % name), HR,
-                     HTMLString(content))
+                     HTMLString(generate_html(md)))
   else:
     return HTMLItems('Page not found. ', link('Create it', '/edit/%s' % name))
 
@@ -67,9 +71,5 @@ def edit(req):
 
 def post(req):
   name = req.environ['selector.vars']['page']
-  md = getformslot('content')
-  umd = unicode(md, config.unicode_encoding)
-  md_pages[name] = md
-  c = markdown.markdown(umd, ['wikilink(base_url=,end_url=)'])
-  html_pages[name] = c.encode(config.unicode_encoding)
+  md_pages[name] = getformslot('content')
   return req.redirect('/view/%s' % name)

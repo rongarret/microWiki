@@ -1,15 +1,15 @@
 # Welcome
 
-Welcome to µWiki.  You might want to start by looking at the [[syntax guide]].
+Welcome to ÂµWiki.  You might want to start by looking at the [[syntax guide]] or creating a [[test page]].
 
 ## About
 
-µWiki is a very small (<100 LOC) but fully functional wiki.  It makes heavy use of third-party code to provide most of its functionality, including:
+ÂµWiki is a very small (<100 LOC) but fully functional wiki.  It makes heavy use of third-party code to provide most of its functionality, including:
 
 * [Yaro](http://lukearno.com/projects/yaro/)
 * [Selector](http://lukearno.com/projects/selector/)
 * [Markdown.py](http://www.freewisdom.org/projects/python-markdown/) (Note that the version being used in this prototype is out of date.)
-* [Showdown](http://attacklab.net/showdown/) (The µWiki UI is lifted more or less directly from Showdown)
+* [Showdown](http://attacklab.net/showdown/) (The ÂµWiki UI is lifted more or less directly from Showdown)
 
 This is an alpha-test version.  It works, but has a lot of known issues:
 
@@ -25,8 +25,6 @@ There are a lot of missing features:
 
 Note that the interface to the storage engine is modular, so that should make adding these features easy.  The interface simply uses the dictionary protocol.  Persistent storage is provided by a class called fdict (File Dictionary) that uses a file-based backing store.  Look at the source code (there's not much of it) for more info.
 
-Since most of the code in µWiki is third-party code it is being made available under the terms of those respective licenses.  The code that I wrote is hereby released under the [MIT open-source license](http://www.opensource.org/licenses/mit-license.php).
+Since most of the code in ÂµWiki is third-party code it is being made available under the terms of those respective licenses.  The code that I wrote is hereby released under the [MIT open-source license](http://www.opensource.org/licenses/mit-license.php).
 
 Comments and feedback are welcome.  Please send them to <ron@flownet.com>
-
-[[test page]]

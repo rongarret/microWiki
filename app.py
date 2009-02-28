@@ -25,6 +25,7 @@ def init():
   s.add('', GET=slashify)
   s.add('/', GET=start)
   s.add('/view/{page}', GET=view)
+  s.add('/view/{page}/{revision}', GET=view)
   s.add('/edit/{page}', GET=edit)
   s.add('/post/{page}', POST=post)
   s.add('/static/{file}', GET=static)
@@ -47,7 +48,7 @@ def static(req):
 def start(req):
   req.redirect('/view/Start')
 
-def generate_html(md):
+def md2html(md):
   umd = unicode(md, config.unicode_encoding)
   html = markdown.markdown(umd, ['wikilink(base_url=,end_url=)'])
   return html.encode(config.unicode_encoding)
@@ -55,10 +56,25 @@ def generate_html(md):
 def view(req):
   req.res.headers['Content-type'] = content_type_header
   name = req.environ['selector.vars']['page']
+  rev = req.environ['selector.vars'].get('revision')
+  if rev:
+    md = md_pages.get('%s~%s' % (name, rev))
+    if not md: return ['%s revision %s not found' % (name, rev)]
+    return ['%s revision %s ' % (name, rev),
+            link('(back)', '/view/%s' % name),
+            HR, HTMLString(md2html(md))]  
   md = md_pages.get(name)
+  revs = md_pages.revisions(name)
   if md:
-    return HTMLItems(link(H2('Edit'), '/edit/%s' % name), HR,
-                     HTMLString(generate_html(md)))
+    l = [name, ' | ', link('EDIT', '/edit/%s' % name)]
+    if revs:
+      l.append(' | Previous versions: ')
+      l.extend([link(str(i), '/view/%s/%s' % (name, i))
+                for i in range(1,revs)])
+      pass
+    l.append(HR)
+    l.append(HTMLString(md2html(md)))
+    return HTMLItems(*l)
   else:
     # Page not found
     l = [name, ' not found. ', link('Create it', '/edit/%s' % name)]

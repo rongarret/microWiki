@@ -25,6 +25,10 @@ class fdict(dict):
 #    codecs.open(path, encoding='utf-8', mode='w').write(content)
     open(path, 'w').write(content)
     pass
+
+  def revisions(self, key):
+    f1 = self.path(key)
+    return max([int(p.split('~')[1]) for p in glob('%s~*' % f1)] or [0])
   
   def revise(self, key, content):
     f1 = self.path(key)
@@ -36,7 +40,7 @@ class fdict(dict):
     # Don't revise if content unchanged
     if size == len(content) and open(f1).read() == content: return
     # Get the next revision number
-    i = max([int(p.split('~')[1]) for p in glob('%s~*' % f1)] or [0])
+    i = self.revisions(key)
     os.rename(f1, self.path('%s~%s' % (key, i+1)))
     self.store(f1, content)
     pass

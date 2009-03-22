@@ -1,4 +1,4 @@
-import os, filecmp, codecs
+import os, codecs
 from glob import glob
 
 '''

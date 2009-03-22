@@ -58,19 +58,21 @@ def view(req):
   name = req.environ['selector.vars']['page']
   rev = req.environ['selector.vars'].get('revision')
   if rev:
+    # View a particular revision
     md = md_pages.get('%s~%s' % (name, rev))
     if not md: return ['%s revision %s not found' % (name, rev)]
     return ['%s revision %s ' % (name, rev),
             link('(back)', '/view/%s' % name),
-            HR, HTMLString(md2html(md))]  
+            HR, HTMLString(md2html(md))]
+  # View the latest revision, with options to edit or view previous revs
   md = md_pages.get(name)
-  revs = md_pages.revisions(name)
   if md:
     l = [name, ' | ', link('EDIT', '/edit/%s' % name)]
+    revs = md_pages.revisions(name)
     if revs:
       l.append(' | Previous versions: ')
       l.extend([link(str(i), '/view/%s/%s' % (name, i))
-                for i in range(1,revs)])
+                for i in range(1, revs+1)])
       pass
     l.append(HR)
     l.append(HTMLString(md2html(md)))

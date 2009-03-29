@@ -1,0 +1,7 @@
+#!/usr/local/bin/js
+
+load("showdown.js")
+converter = new Showdown.converter();
+var s = ""
+while (line=readline()) { s = s + line }
+print(converter.makeHtml(s))

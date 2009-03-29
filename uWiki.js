@@ -1,5 +1,5 @@
 //
-// uWiki.js (pronounced "micro-wiki"
+// uWiki.js (pronounced "micro-wiki")
 //
 // Adapted from showdown.js (http://www.attacklab.net/) by John Frasier
 //
@@ -31,72 +31,73 @@ var maxDelay = 3000; // longest update pause (in ms)
 //
 
 function startGui() {
-    // find elements
-    convertTextSetting = document.getElementById("convertTextSetting");
-    convertTextButton = document.getElementById("convertTextButton");
-    
-    inputPane = document.getElementById("inputPane");
-    previewPane = document.getElementById("previewPane");
-    outputPane = document.getElementById("outputPane");
-    syntaxPane = document.getElementById("syntaxPane");
-    footer = document.getElementById("footer");
-    display = document.getElementById("display");
-    
-    // set event handlers
-    convertTextSetting.onchange = onConvertTextSettingChanged;
-    convertTextButton.onclick = onConvertTextButtonClicked;
-    window.onresize = setPaneHeights;
+  // find elements
+  convertTextSetting = document.getElementById("convertTextSetting");
+  convertTextButton = document.getElementById("convertTextButton");
+  
+  inputPane = document.getElementById("inputPane");
+  previewPane = document.getElementById("previewPane");
+  outputPane = document.getElementById("outputPane");
+  syntaxPane = document.getElementById("syntaxPane");
+  footer = document.getElementById("footer");
+  display = document.getElementById("display");
+  lastTab = document.getElementById("ptab");
 
-    // First, try registering for keyup events
-    // (There's no harm in calling onInput() repeatedly)
-    window.onkeyup = inputPane.onkeyup = onInput;
-
-    // In case we can't capture paste events, poll for them
-    var pollingFallback = window.setInterval(function(){
-	    if(inputPane.value != lastText)
-		onInput();
-	},1000);
-
-    // Try registering for paste events
-    inputPane.onpaste = function() {
-	// It worked! Cancel paste polling.
-	if (pollingFallback!=undefined) {
-	    window.clearInterval(pollingFallback);
-	    pollingFallback = undefined;
-	}
-	onInput();
+  // set event handlers
+  convertTextSetting.onchange = onConvertTextSettingChanged;
+  convertTextButton.onclick = onConvertTextButtonClicked;
+  window.onresize = setPaneHeights;
+  
+  // First, try registering for keyup events
+  // (There's no harm in calling onInput() repeatedly)
+  window.onkeyup = inputPane.onkeyup = onInput;
+  
+  // In case we can't capture paste events, poll for them
+  var pollingFallback = window.setInterval(function(){
+    if(inputPane.value != lastText)
+      onInput();
+  },1000);
+  
+  // Try registering for paste events
+  inputPane.onpaste = function() {
+    // It worked! Cancel paste polling.
+    if (pollingFallback!=undefined) {
+      window.clearInterval(pollingFallback);
+      pollingFallback = undefined;
     }
-
-    // Try registering for input events (the best solution)
-    if (inputPane.addEventListener) {
-	// Let's assume input also fires on paste.
-	// No need to cancel our keyup handlers;
-	// they're basically free.
-	inputPane.addEventListener("input",inputPane.onpaste,false);
-    }
-
-    // poll for changes in font size
-    // this is cheap; do it often
-    window.setInterval(setPaneHeights,250);
-
-    // start with blank page?
+    onInput();
+  }
+  
+  // Try registering for input events (the best solution)
+  if (inputPane.addEventListener) {
+    // Let's assume input also fires on paste.
+    // No need to cancel our keyup handlers;
+    // they're basically free.
+    inputPane.addEventListener("input",inputPane.onpaste,false);
+  }
+  
+  // poll for changes in font size
+  // this is cheap; do it often
+  window.setInterval(setPaneHeights,250);
+  
+  // start with blank page?
     if (top.document.location.href.match(/\?blank=1$/))
-	inputPane.value = "";
-
-    // build the converter
-    converter = new Showdown.converter();
-
-    // do an initial conversion to avoid a hiccup
-    convertText();
-
-    // give the input pane focus
-    inputPane.focus();
-
-    // start the other panes at the top
-    // (our smart scrolling moved them to the bottom)
-    previewPane.scrollTop = 0;
-    outputPane.scrollTop = 0;
-    selectPane('previewPane');
+      inputPane.value = "";
+  
+  // build the converter
+  converter = new Showdown.converter();
+  
+  // do an initial conversion to avoid a hiccup
+  convertText();
+  
+  // give the input pane focus
+  inputPane.focus();
+  
+  // start the other panes at the top
+  // (our smart scrolling moved them to the bottom)
+  previewPane.scrollTop = 0;
+  outputPane.scrollTop = 0;
+  selectPane('previewPane');
 }
 
 
@@ -105,35 +106,35 @@ function startGui() {
 //
 
 function convertText() {
-    // get input text
-    var text = inputPane.value;
-	
-    // if there's no change to input, cancel conversion
-    if (text && text == lastText) {
-	return;
-    } else {
-	lastText = text;
-    }
-
-    var startTime = new Date().getTime();
-
-    // Do the conversion
-    text = converter.makeHtml(text);
-
-    // display processing time
-    var endTime = new Date().getTime();	
-    processingTime = endTime - startTime;
-    document.getElementById("processingTime").innerHTML = processingTime+" ms";
-
-    // save proportional scroll positions
-    saveScrollPositions();
-
-    // Update the appropriate pane
-    lastOutput = text;
-    updateActivePane()
-
-    // restore proportional scroll positions
-    restoreScrollPositions();
+  // get input text
+  var text = inputPane.value;
+  
+  // if there's no change to input, cancel conversion
+  if (text && text == lastText) {
+    return;
+  } else {
+    lastText = text;
+  }
+  
+  var startTime = new Date().getTime();
+  
+  // Do the conversion
+  text = converter.makeHtml(text);
+  
+  // display processing time
+  var endTime = new Date().getTime();	
+  processingTime = endTime - startTime;
+  document.getElementById("processingTime").innerHTML = processingTime+" ms";
+  
+  // save proportional scroll positions
+  saveScrollPositions();
+  
+  // Update the appropriate pane
+  lastOutput = text;
+  updateActivePane()
+  
+  // restore proportional scroll positions
+  restoreScrollPositions();
 };
 
 
@@ -142,38 +143,41 @@ function convertText() {
 //
 
 function onConvertTextSettingChanged() {
-    // If the user just enabled automatic
-    // updates, we'll do one now.
-    onInput();
+  // If the user just enabled automatic
+  // updates, we'll do one now.
+  onInput();
 }
 
 function onConvertTextButtonClicked() {
-    // hack: force the converter to run
-    lastText = "";
-
-    convertText();
-    inputPane.focus();
+  // hack: force the converter to run
+  lastText = "";
+  
+  convertText();
+  inputPane.focus();
 }
 
+function onSubmit () {
+  document.getElementById('html').value=converter.makeHtml(inputPane.value)
+}
 
 function selectTab(tab, pane){
- if (lastTab) lastTab.className='';
- tab.className='selected';
- lastTab = tab;
- selectPane(pane);
+  lastTab.className='';
+  tab.className='selected';
+  lastTab = tab;
+  selectPane(pane);
 }
 
 function selectPane(pane) {
-    previewPane.style.display = "none";
-    outputPane.style.display = "none";
-    syntaxPane.style.display = "none";
-
-    // now make the selected one visible
-    top[pane].style.display = "block";
-
-    setPaneHeights();
-    activePane = pane;
-    updateActivePane();
+  previewPane.style.display = "none";
+  outputPane.style.display = "none";
+  syntaxPane.style.display = "none";
+  
+  // now make the selected one visible
+  top[pane].style.display = "block";
+  
+  setPaneHeights();
+  activePane = pane;
+  updateActivePane();
 }
 
 function updateActivePane() {
@@ -182,34 +186,34 @@ function updateActivePane() {
 }
 
 function onInput() {
-    // In "delayed" mode, we do the conversion at pauses in input.
-    // The pause is equal to the last runtime, so that slow
-    // updates happen less frequently.
-    //
-    // Use a timer to schedule updates.  Each keystroke
-    // resets the timer.
-
-    // if we already have convertText scheduled, cancel it
-    if (convertTextTimer) {
-	window.clearTimeout(convertTextTimer);
-	convertTextTimer = undefined;
+  // In "delayed" mode, we do the conversion at pauses in input.
+  // The pause is equal to the last runtime, so that slow
+  // updates happen less frequently.
+  //
+  // Use a timer to schedule updates.  Each keystroke
+  // resets the timer.
+  
+  // if we already have convertText scheduled, cancel it
+  if (convertTextTimer) {
+    window.clearTimeout(convertTextTimer);
+    convertTextTimer = undefined;
+  }
+  
+  if (convertTextSetting.value != "manual") {
+    var timeUntilConvertText = 0;
+    if (convertTextSetting.value == "delayed") {
+      // make timer adaptive
+      timeUntilConvertText = processingTime;
     }
-
-    if (convertTextSetting.value != "manual") {
-	var timeUntilConvertText = 0;
-	if (convertTextSetting.value == "delayed") {
-	    // make timer adaptive
-	    timeUntilConvertText = processingTime;
-	}
-
-	if (timeUntilConvertText > maxDelay)
-	    timeUntilConvertText = maxDelay;
-
-	// Schedule convertText().
-	// Even if we're updating every keystroke, use a timer at 0.
-	// This gives the browser time to handle other events.
-	convertTextTimer = window.setTimeout(convertText,timeUntilConvertText);
-    }
+    
+    if (timeUntilConvertText > maxDelay)
+      timeUntilConvertText = maxDelay;
+    
+    // Schedule convertText().
+    // Even if we're updating every keystroke, use a timer at 0.
+    // This gives the browser time to handle other events.
+    convertTextTimer = window.setTimeout(convertText,timeUntilConvertText);
+  }
 }
 
 

@@ -4,7 +4,7 @@
 
 <head>
 
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
 <title>uWiki</title>
 
@@ -29,14 +29,15 @@
 	  <textarea name="content" id="inputPane" cols="70"
 		    rows="20">%(md_content)s</textarea>
 	  <br />
-	  <input type=submit name=submit value="Save" />
+	  <input type=hidden name=html id=html value="">
+	  <input type=submit name=submit value="Save" onClick="onSubmit()" />
 	  <input type=button name=cancel value=Cancel onClick="history.go(-1)">
 	</form>
       </td>
       <td valign=top>
 
 	<ul class="tabnav">
-	  <li><a class='selected' href="#" onClick="selectTab(this, 'previewPane')">
+	  <li><a class='selected' id='ptab' href="#" onClick="selectTab(this, 'previewPane')">
 	      Preview</a></li>
 	  <li><a href="#" onClick="selectTab(this, 'outputPane')">
 	      HTML Output</a></li>

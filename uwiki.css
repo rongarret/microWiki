@@ -9,7 +9,7 @@ table {
   background-color: #f7eeee;
 }
 
-table td { border: solid 1px gray; padding: 10px; }
+table td,th { border: solid 1px gray; padding: 10px; }
 
 h1.uwiki { color: #666; margin: auto; }
 h2.uwiki { color: #666; display:inline; }
@@ -19,7 +19,7 @@ h2.uwiki { color: #666; display:inline; }
 #syntaxPane { background-color: #f7eeee; }
 #previewPane {
     font-family: Helvetica, Arial, Verdana, sans-serif;
-    font-size: 90%%;
+    font-size: 90%;
     border: solid 1px black;
     width: 40em;
     overflow: auto;

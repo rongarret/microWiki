@@ -3,8 +3,7 @@ from wrappers import standard_wrap, tlp_wrap
 from selector import Selector
 from html import *
 from utils import getformslot
-import markdown
-import re
+import re, datetime
 
 s = Selector(wrap=standard_wrap)
 application = tlp_wrap(s)
@@ -33,14 +32,43 @@ def init():
 
 template = open('uWiki.template').read()
 spath = '/static'
-helptext = open('markdown-ref.txt').read()
 content_type_header = 'text/html; charset=' + config.unicode_encoding
+helptext = open('markdown-ref.txt').read()  # For inclusion on editing page
 
-md_pages = { 'Start': helptext }
-html_pages = {}
+class rcstore(object):
 
-from fdict import fdict
-md_pages = fdict(config.content_root)
+  HTML = 'html'
+  MARKDOWN = 'mrk'
+  METADATA = 'mtd'
+  REVISION = 'rev'
+  
+  def __init__(self, db = {}):
+    self.db = db
+    pass
+
+  def latest_revision(self, name):
+    return int(self.db.get('%s.%s' % (name, rcstore.REVISION), 0))
+
+  def get(self, name, type, rev=None):
+    rev = rev or self.latest_revision(name)
+    return self.db.get('%s~%s.%s' % (name, rev, type))
+  
+  def store(self, name, markdown, html, metadata):
+    rev = self.latest_revision(name)
+    if rev:
+      old_markdown = self.get(name, rcstore.MARKDOWN)
+      if markdown == old_markdown: return # Don't store content if unchanged
+      pass
+    rev = rev + 1
+    self.db['%s~%s.%s' % (name, rev, rcstore.MARKDOWN)] = markdown
+    self.db['%s~%s.%s' % (name, rev, rcstore.HTML)] = html
+    self.db['%s~%s.%s' % (name, rev, rcstore.METADATA)] = metadata
+    self.db['%s.%s' % (name, rcstore.REVISION)] = str(rev)
+    pass
+
+  pass
+
+content = rcstore({})
 
 def static(req):
   return HTMLString(open(req.environ['selector.vars']['file']).read())
@@ -48,34 +76,30 @@ def static(req):
 def start(req):
   req.redirect('/view/Start')
 
-def md2html(md):
-  umd = unicode(md, config.unicode_encoding)
-  html = markdown.markdown(umd, ['wikilink(base_url=,end_url=)'])
-  return html.encode(config.unicode_encoding)
-
 def view(req):
   req.res.headers['Content-type'] = content_type_header
   name = req.environ['selector.vars']['page']
   rev = req.environ['selector.vars'].get('revision')
+  markdown = content.get(name, rcstore.MARKDOWN, rev)
+  html = content.get(name, rcstore.HTML, rev)
+  
   if rev:
     # View a particular revision
-    md = md_pages.get('%s~%s' % (name, rev))
-    if not md: return ['%s revision %s not found' % (name, rev)]
+    if not markdown: return ['%s revision %s not found' % (name, rev)]
     return ['%s revision %s ' % (name, rev),
-            link('(back)', '/view/%s' % name),
-            HR, HTMLString(md2html(md))]
+            link('(back)', '/view/%s' % name), HR, HTMLString(html)]
+
   # View the latest revision, with options to edit or view previous revs
-  md = md_pages.get(name)
-  if md:
+  if markdown:
     l = [name, ' | ', link('EDIT', '/edit/%s' % name)]
-    revs = md_pages.revisions(name)
-    if revs:
+    revs = content.latest_revision(name)
+    if revs>1:
       l.append(' | Previous versions: ')
       l.extend([link(str(i), '/view/%s/%s' % (name, i))
-                for i in range(1, revs+1)])
+                for i in range(1, revs)])
       pass
     l.append(HR)
-    l.append(HTMLString(md2html(md)))
+    l.append(HTMLString(html))
     return HTMLItems(*l)
   else:
     # Page not found
@@ -88,12 +112,13 @@ def view(req):
 def edit(req):
   req.res.headers['Content-type']='text/html'
   name = req.environ['selector.vars']['page']
-  md_content = md_pages.get(name) or '# %s\n\nNew page' % name
-  d = { 'name':name, 'md_content':md_content, 'spath':spath,
-        'helptext': helptext }
+  markdown = content.get(name, rcstore.MARKDOWN) or '# %s\n\nNew page' % name
+  d = { 'name' : name, 'md_content' : markdown, 'spath' : spath,
+        'helptext' : helptext }
   return HTMLString(template % d)
 
 def post(req):
   name = req.environ['selector.vars']['page']
-  md_pages[name] = getformslot('content')
+  content.store(name, getformslot('content'), getformslot('html'),
+                str({'timestamp' : datetime.datetime.now()}))
   return req.redirect('/view/%s' % name)

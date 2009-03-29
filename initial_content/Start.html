@@ -1,0 +1,49 @@
+<h1>Welcome</h1>
+
+<p>Welcome to µWiki.  You might want to start by looking at the <a href=/view/SyntaxGuide>syntax guide</a> or
+ creating a <a href=/view/TestPage>test page</a>.</p>
+
+<h2>About</h2>
+
+<p>µWiki is a very small (&lt;100 LOC) but fully functional wiki.  It makes heavy use 
+of third-party code to provide most of its functionality, including:</p>
+
+<ul>
+<li><a href="http://lukearno.com/projects/yaro/">Yaro</a></li>
+<li><a href="http://lukearno.com/projects/selector/">Selector</a></li>
+<li><a href="http://www.freewisdom.org/projects/python-markdown/">Markdown.py</a> (Note that 
+the version being used in this prototype is out of date.)</li>
+<li><a href="http://attacklab.net/showdown/">Showdown</a> (The µWiki UI is lifted more or les
+s directly from Showdown)</li>
+</ul>
+
+<p>This is an alpha-test version.  It works, but has a lot of known issues:</p>
+
+<ul>
+<li>Unicode handling is not being done properly</li>
+<li>The UI CSS is a mess.  (And horror of horrors, it uses a table!)</li>
+<li>The view page has no style sheet at all.</li>
+<li>Source code has very little documentation (but there's very little source code
+)</li>
+</ul>
+
+<p>There are a lot of missing features:</p>
+
+<ul>
+<li>No access control (my plan is to provide this as a separate independent WSGI w
+rapper)</li>
+<li>No revision control (ditto)</li>
+</ul>
+
+<p>Note that the interface to the storage engine is modular, so that should make ad
+ding these features easy.  The interface simply uses the dictionary protocol.  P
+ersistent storage is provided by a class called fdict (File Dictionary) that use
+s a file-based backing store.  Look at the source code (there's not much of it) 
+for more info.</p>
+
+<p>Since most of the code in µWiki is third-party code it is being made available u
+nder the terms of those respective licenses.  The code that I wrote is hereby re
+leased under the [MIT open-source license](http://www.opensource.org/licenses/mi
+t-license.php).</p>
+
+<p>Comments and feedback are welcome.  Please send them to <a href="&#x6D;&#x61;&#x69;&#108;&#116;&#x6F;:r&#x6F;&#x6E;&#x40;&#x66;&#x6C;&#111;&#119;&#110;&#101;t&#x2E;&#99;&#x6F;&#109;">r&#x6F;&#x6E;&#x40;&#x66;&#x6C;&#111;&#119;&#110;&#101;t&#x2E;&#99;&#x6F;&#109;</a></p>

@@ -118,6 +118,35 @@ function process_tables(text) {
   return text.replace(table_re, format_table)
 }
 
+conflict_re = /!<+\n((?:\n|.)*?)\n!=+\n((?:\n|.)*?)\n!>+\n/gm
+
+function format_conflicts(whole, a, b, n) {
+  var s = '<input type=button value="% version:" onClick="resolve(%,%,%)">'
+  return '\n\n<div class=box><font color=red>*** CONFLICT ***</font><br>' +
+    format(s, ['Your', n, whole.length, 1]) +
+    '<div class=box>' + a + '</div>' +
+    format(s, ['Other', n, whole.length, 2]) +
+    '<div class=box>' + b + '</div></div>\n\n'
+}
+
+function process_conflicts(text) {
+  return text.replace(conflict_re, format_conflicts)
+}
+
+function resolve(index, cnt, i) {
+  s = inputPane.value
+  s1 = s.slice(0,index)
+  s2 = s.substr(index, cnt)
+  s3 = s.slice(index+cnt)
+  m = s2.match(conflict_re)
+  inputPane.value = s + s2
+//  inputPane.value = s1 + m[i] + s3
+}
+
+function format(s, a) {
+  var i = 0;
+  return s.replace(/%/g, function () { return a[i++] })
+}
 
 //
 // Showdown namespace
@@ -195,10 +224,12 @@ Showdown.converter = function() {
     // Strip link definitions, store in hashes.
     text = _StripLinkDefinitions(text);
 
+    text = process_conflicts(text)
+
     text = _RunBlockGamut(text);
+
     text = process_tables(text)
     text = process_wikilinks(text)
-
 
     text = _UnescapeSpecialChars(text);
 

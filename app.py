@@ -112,13 +112,41 @@ def view(req):
 def edit(req):
   req.res.headers['Content-type']='text/html'
   name = req.environ['selector.vars']['page']
+  base_version = content.latest_revision(name)
   markdown = content.get(name, rcstore.MARKDOWN) or '# %s\n\nNew page' % name
   d = { 'name' : name, 'md_content' : markdown, 'spath' : spath,
-        'helptext' : helptext }
+        'base_version' : base_version, 'helptext' : helptext }
   return HTMLString(template % d)
 
 def post(req):
   name = req.environ['selector.vars']['page']
+  latest_version = content.latest_revision(name)
+  base_version = int(getformslot('base_version'))
+  if latest_version != base_version:
+    return resolve(name, base_version, latest_version)
   content.store(name, getformslot('content'), getformslot('html'),
                 str({'timestamp' : datetime.datetime.now()}))
   return req.redirect('/view/%s' % name)
+
+import resolver
+import merge3
+
+def resolve(name, base_version, latest_version):
+  new = getformslot('content')
+  base = content.get(name, rcstore.MARKDOWN, base_version) or ""
+  latest = content.get(name, rcstore.MARKDOWN, latest_version) or ""
+  o = [s.strip() for s in base.split('\n')]
+  a = [s.strip() for s in new.split('\n')]
+  b = [s.strip() for s in latest.split('\n')]
+  m = merge3.Merge3(o,a,b)
+  mg = list(m.merge_groups())
+  conflicts = 0
+  for g in mg:
+    if g[0]=='conflict': conflicts+=1
+    pass
+  return HTMLItems(
+    HTMLString(resolver.style),
+    HTMLString('Conflicts: %s<br>' % conflicts),
+    Tag('DIV',
+        HTMLString('\n'.join([resolver.merge_group_to_html(g) for g in mg])),
+        _class='border1'))

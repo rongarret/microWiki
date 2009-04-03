@@ -115,7 +115,7 @@ def edit(req):
   base_version = content.latest_revision(name)
   markdown = content.get(name, rcstore.MARKDOWN) or '# %s\n\nNew page' % name
   d = { 'name' : name, 'md_content' : markdown, 'spath' : spath,
-        'base_version' : base_version, 'helptext' : helptext }
+        'base_version' : base_version, 'helptext' : helptext, 'msg' : name }
   return HTMLString(template % d)
 
 def post(req):
@@ -128,25 +128,34 @@ def post(req):
                 str({'timestamp' : datetime.datetime.now()}))
   return req.redirect('/view/%s' % name)
 
-import resolver
-import merge3
+import merge3, StringIO
+
+def lines(s): return StringIO.StringIO(s).readlines()
+
+merge_msg = '''Someone else has modified this page since you started editing
+it. Your changes have been merged with theirs.  Please check that the results
+of the merge are satisfactory and re-save the page.'''
+
+conflict_msg = '''Someone else has modified this page since you started editing
+it.  Trying to merge your changes has resulted in conflicts that cannot be
+automatically resolved.  Please resolve these conflicts manually and re-save
+the page.'''
 
 def resolve(name, base_version, latest_version):
   new = getformslot('content')
-  base = content.get(name, rcstore.MARKDOWN, base_version) or ""
-  latest = content.get(name, rcstore.MARKDOWN, latest_version) or ""
-  o = [s.strip() for s in base.split('\n')]
-  a = [s.strip() for s in new.split('\n')]
-  b = [s.strip() for s in latest.split('\n')]
-  m = merge3.Merge3(o,a,b)
+  base = content.get(name, rcstore.MARKDOWN, base_version) or ''
+  latest = content.get(name, rcstore.MARKDOWN, latest_version) or ''
+  m = merge3.Merge3(lines(base), lines(new), lines(latest))
   mg = list(m.merge_groups())
   conflicts = 0
   for g in mg:
     if g[0]=='conflict': conflicts+=1
     pass
-  return HTMLItems(
-    HTMLString(resolver.style),
-    HTMLString('Conflicts: %s<br>' % conflicts),
-    Tag('DIV',
-        HTMLString('\n'.join([resolver.merge_group_to_html(g) for g in mg])),
-        _class='border1'))
+  merged = ''.join(m.merge_lines(
+    start_marker='\n!!!--Conflict--!!!\n!--Your version--',
+    mid_marker='\n!--Other version--',
+    end_marker='\n!--End conflict--\n'))
+  d = { 'name' : name, 'md_content' : merged, 'spath' : spath,
+        'base_version' : latest_version, 'helptext' : helptext,
+        'msg' : conflict_msg if conflicts else merge_msg }
+  return HTMLString(template % d)

@@ -90,27 +90,25 @@ function format_tr(s) {
   return tag("TR", s)
 }
 
-table_re = /^(?:<p>)?( *\|.*?\| *(?:<\/p>)?\n)+/gm
+table_re = /^(\|.*?\|\n)+/gm
 
 function format_table(m) {
-  m = m.replace(/^<p>/, "")
-  m = m.replace(/(<\/p>)?\n$/, "")
-  m = m.split("\n")
+  m = m.split("\n").slice(0,-1)
   m = m.map(function (s) { return s.replace(/^ *\|/, "") })
   m = m.map(function (s) { return s.replace(/\| *$/, "") })
   m = m.map(function(s) { return s.split("|").map(format_td).join("") })
   m = m.map(format_tr).join("\n")
-  return "<p><table>\n" + m + "\n</table></p>"
+  return "\n<p><table>\n" + m + "\n</table></p>\n"
 }
 
 // Alternate table syntax to suport cut-and-paste of MySQL output
 //
-table1_re = /^<p>\+(?:-+\+)+\n(.+?)\n\+(?:-+\+)+\n((.+?\n)+?)\+(?:-+\+)+<\/p>\n$/gm
+table1_re = /^\+(?:-+\+)+\n(.+?)\n\+(?:-+\+)+\n((.+?\n)+?)\+(?:-+\+)+\n$/gm
 
 function format_table1(whole, headers, body) {
   headers = headers.replace(/\|/g, "|+")
   headers = headers.replace(/\+$/, "")
-  return "<p>" + headers + "\n" + body.slice(0,-1) + "</p>\n"
+  return headers + "\n" + body.slice(0,-1) + "\n"
 }
 
 function process_tables(text) {
@@ -118,34 +116,22 @@ function process_tables(text) {
   return text.replace(table_re, format_table)
 }
 
-conflict_re = /!<+\n((?:\n|.)*?)\n!=+\n((?:\n|.)*?)\n!>+\n/gm
+conflict_re = /!!!--.*?\n!--.*?\n((?:\n|.)*?)\n!--.*?\n((?:\n|.)*?)\n!--.*?\n/gm
 
 function format_conflicts(whole, a, b, n) {
-  var s = '<input type=button value="% version:" onClick="resolve(%,%,%)">'
-  return '\n\n<div class=box><font color=red>*** CONFLICT ***</font><br>' +
-    format(s, ['Your', n, whole.length, 1]) +
-    '<div class=box>' + a + '</div>' +
-    format(s, ['Other', n, whole.length, 2]) +
-    '<div class=box>' + b + '</div></div>\n\n'
+  return '\n\n\[\[\[\n\n###<font color=red>`*** CONFLICT ***`</font>\n\n' +
+    'Your version:\n\n[[[\n\n' + a +
+    '\n\n\]\]\]\n\nOther version:\n\n\[\[\[\n\n' + b +
+    '\n\n\]\]\]\n\n\]\]\]\n\n'
 }
 
 function process_conflicts(text) {
   return text.replace(conflict_re, format_conflicts)
 }
 
-function resolve(index, cnt, i) {
-  s = inputPane.value
-  s1 = s.slice(0,index)
-  s2 = s.substr(index, cnt)
-  s3 = s.slice(index+cnt)
-  m = s2.match(conflict_re)
-  inputPane.value = s + s2
-//  inputPane.value = s1 + m[i] + s3
-}
-
-function format(s, a) {
-  var i = 0;
-  return s.replace(/%/g, function () { return a[i++] })
+function process_boxes(text) {
+  text = text.replace(/^<p>\[\[\[<\/p>\n/gm, '<div class=box>')
+  return text.replace(/^<p>\]\]\]<\/p>\n/gm, '</div>')
 }
 
 //
@@ -225,13 +211,13 @@ Showdown.converter = function() {
     text = _StripLinkDefinitions(text);
 
     text = process_conflicts(text)
-
-    text = _RunBlockGamut(text);
-
     text = process_tables(text)
     text = process_wikilinks(text)
 
+    text = _RunBlockGamut(text);
     text = _UnescapeSpecialChars(text);
+
+    text = process_boxes(text)
 
     // attacklab: Restore dollar signs
     text = text.replace(/~D/g,"$$");

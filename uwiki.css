@@ -13,6 +13,8 @@ table td,th { border: solid 1px gray; padding: 10px; }
 
 div.box { border: 1px solid gray; margin: 5px; padding: 5px }
 
+div.banner { width:40em; padding: 5px; }
+
 h1.uwiki { color: #666; margin: auto; }
 h2.uwiki { color: #666; display:inline; }
 .copyright { color: #999; font-size: x-small; }

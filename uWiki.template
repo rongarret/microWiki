@@ -18,6 +18,8 @@
 <body>
 
   <h1 class="uwiki center">&micro;Wiki</h1>
+  
+  <div class="banner center">%(msg)s</div>
 
   <table class=center>
     <tr>

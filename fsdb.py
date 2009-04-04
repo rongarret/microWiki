@@ -2,7 +2,7 @@ import os, os.path
 
 class fsdb(object):
 
-  def __repr__(self): return '<fsdb at %s>' % 
+  def __repr__(self): return '<fsdb at %s>' % self.rootpath
 
   def __init__(self, rootpath, create=False):
     self.rootpath = rootpath
@@ -21,7 +21,8 @@ class fsdb(object):
 
   def keys(self): return os.listdir(self.rootpath)
 
-  def get(self, key): return self[key] if self.has_key(key) else None
+  def get(self, key, default=None):
+    return self[key] if self.has_key(key) else default
   
   pass
 

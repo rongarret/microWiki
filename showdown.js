@@ -90,7 +90,7 @@ function format_tr(s) {
   return tag("TR", s)
 }
 
-table_re = /^(\|.*?\|\n)+/gm
+table_re = /^(\|.*?\|\s*?\n)+/gm
 
 function format_table(m) {
   m = m.split("\n").slice(0,-1)
@@ -103,10 +103,11 @@ function format_table(m) {
 
 // Alternate table syntax to suport cut-and-paste of MySQL output
 //
-table1_re = /^\+(?:-+\+)+\n(.+?)\n\+(?:-+\+)+\n((.+?\n)+?)\+(?:-+\+)+\n$/gm
+
+table1_re = /^\+(?:-+\+)+\s*?\n(.+?)\n\+(?:-+\+)+\s*?\n((.+?\n)+?)\+(?:-+\+)+\s*?\n$/gm
 
 function format_table1(whole, headers, body) {
-  headers = headers.replace(/\|/g, "|+")
+  headers = headers.replace(/\|\s*/g, "|+")
   headers = headers.replace(/\+$/, "")
   return headers + "\n" + body.slice(0,-1) + "\n"
 }

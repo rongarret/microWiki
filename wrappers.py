@@ -4,12 +4,16 @@ from yaro import Yaro
 from session import get_session
 import sys, cgitb, cgitb_patch
 
+# Stash a copy of the req in threadvars so getformslot can find it
+#
 def form_wrap(app):
   def wrap(req):
     threadvars.req = req
     return app(req)
   return wrap
 
+# Just an example. This actually gets overridden in app.py at the moment
+#
 def style(thing):
   return [HTMLItems(
     stylesheet('http://mcia.cc/style.css'),
@@ -22,6 +26,8 @@ def style(thing):
 def style_wrap(app):
   return lambda req: style(app(req))
 
+# Catch WSGI errors and display them readably
+#
 def wsgi_tb_wrap(app):
   def wrap(env, start_response):
     try:
@@ -33,6 +39,8 @@ def wsgi_tb_wrap(app):
     pass
   return wrap
 
+# Catch YARO errors and display them readably
+#
 def yaro_tb_wrap(app):
   def wrap(req):
     try:
@@ -44,6 +52,9 @@ def yaro_tb_wrap(app):
     pass
   return wrap
 
+# Capture the Top Level Path.  Used for setting session cookies (though
+# I don't remember exactly how this fits in)
+#
 def tlp_wrap(app):
   def wrap(env, start_response):
     env['TOP_LEVEL_PATH']=env['SCRIPT_NAME']

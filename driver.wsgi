@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
-import sys, os.path
+import sys, os
 
 try:
-  __file__
-  sys.path.append(os.path.dirname(__file__))
+  d = os.path.dirname(__file__)
+  if d:
+    os.chdir(d)
+    sys.path.append(d)
+    pass
+  pass
 except NameError:
   __file__ = '?'
 

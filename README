@@ -1,0 +1,28 @@
+
+This is μWiki, a very small but fully functional wiki written by Ron
+Garret.  It is as much an exercise in modular WSGI development as a
+functional product.  The total code base is currently about 3500 lines
+of code, of which only about 150 lines are the wiki proper.  Everything
+else is infrastructure.
+
+The current code base is the result of a major overhaul that added user
+authorization through Facebook and OpenID (currently hard-coded to use
+Google, but that's easy to change).  Some more work is needed to make it
+easy for someone besides me to install it.  But this is more or less
+what you have to do:
+
+1.  Run ./content_init.py  (You will need a resident Javascript interpreter
+to run this.  The original μWiki used a Python markdown->HTML converter,
+but that was changed so that the same conversion code could run on the
+server and the client.  Maintaining consistency between two different
+markdown converters was too much bother.)
+
+2.  Edit config.py appropriately.
+
+3.  To run locally: python -i driver.wsgi
+
+4.  To run under a server, make sure your content directory has appropriate
+privileges set, and point a WSGIScriptAlias (or whatever your server uses)
+to driver.wsgi.
+
+Send comments, questions and bug reports to ron@flownet.com

@@ -375,18 +375,3 @@ def find_invitation(email):
     if invite.email==email: return invite
     pass
   return None
-
-# Horrible hack to get things started
-@page('/init')
-@stdwrap
-def root(req):
-  l = []
-  for email in eval(open('initial-users').read()):
-    if not find_invitation(email):
-      send_invitation(req, email)
-      l.append(email)
-      pass
-    pass
-  if not l: return ['All invitations sent.']
-  return ['Sent invitations to ', len(l), ' users.', BR,
-          [[addr, BR] for addr in l]]

@@ -22,3 +22,25 @@ content.store('Start', start, start_html, metadata)
 content.store('SyntaxGuide', syntax_ref, syntax_html, metadata)
 
 print 'μWiki content has been initialized.'
+#!/usr/bin/python
+
+import auth, sys
+from auth import email_re
+
+def main():
+  if len(sys.argv)!=2:
+    print 'Usage: mkinvite [email]'
+    return
+  email = sys.argv[1]
+  if not email_re.match(email):
+    print email, 'is not a valid email address'
+    return
+  auth.restore_state()
+  id = auth.make_session_id()
+  auth.invitations[id] = auth.Invitation(id, email)
+  auth.save_state()
+  print 'Invitation ID is ', id
+  print 'Go to http://[my-host]/register/%s to register.' % id
+  return
+
+if __name__=='__main__': main()

@@ -1,0 +1,16 @@
+μWiki was written by Ron Garret and contains significant contributions
+from other people.
+
+Yaro and Selector were written by Luke Arno (http://lukearno.com/) and
+are released under the GPL.
+
+showdown.js was written by John Fraser and is released under a BSD licence.
+
+auth.py incorporates code that is copyrighted by Facebook and
+used according to the terms of their developer license.
+
+μWiki code was originally released under the MIT license
+(http://www.opensource.org/licenses/mit-license.php) but because it
+incorporates GPL code this was probably a violation of the GPL, though
+IANAL.  If μWiki ever becomes popular enough for this to matter I'll
+sort it out then.

@@ -1,12 +1,17 @@
 
 host = 'localhost:8080'
 
-fb_app_id = '202816686428253'
-fb_secret = 'e764018e308d9299b37993514052789f'
+# Insert your facebook app id and secret here.  If you don't have
+# a FB app id you can get one at http://developers.facebook.com/setup/
+#
+fb_app_id = '...'
+fb_secret = '...'
 
 unicode_encoding = 'utf-8'
 content_root = 'content'
 
 invitation_timeout = 72.0 # In hours
 
-admins = ['ron@flownet.com']
+# Emal addresses of people who will be able to send invitations
+#
+admins = []

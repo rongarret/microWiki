@@ -1,12 +1,14 @@
 from cgi import escape
 from types import GeneratorType
 
+def propstring(propname, propvalue):
+  v = escape(propvalue(), 1) if callable(propvalue) else propvalue
+  return propname if v is None else '%s="%s"' % (propname, v)
+
 def no_content_tag_string(tag_name, **props):
   if props:
-    propstring = ' '.join(['%s="%s"' %
-                           (p, escape(str(v()),1) if callable(v) else v)
-                           for (p, v) in props.iteritems()])
-    return '<%s %s>' % (tag_name, propstring)
+    propstr = ' '.join([propstring(p, v) for (p, v) in props.iteritems()])
+    return '<%s %s>' % (tag_name, propstr)
   return '<%s>' % tag_name
 
 def tag_string_with_content(tag_name, content, **props):
@@ -92,7 +94,6 @@ def stylesheet(url):
 class HTMLList(list):
   def as_html(self):
     return '\n'.join(as_html(i) for i in self)
-  __str__ = as_html
   pass
 
 def HTMLItems(*l): return HTMLList(l)
@@ -112,3 +113,6 @@ class Table(Tag):
     Tag.__init__(self, 'TABLE', HTMLList(content), **props)
     pass
   pass
+
+def Button(name, onClick):
+  return Tag('Input', type='button', value=name, onclick=onClick)

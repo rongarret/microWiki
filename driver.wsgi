@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 
-import sys, os
+import sys, os, threading
+from wsgiref.simple_server import make_server
 
-try:
-  d = os.path.dirname(__file__)
-  if d:
-    os.chdir(d)
-    sys.path.append(d)
-    pass
+if __name__!='__main__':
+  d=os.path.dirname(__file__)
+  os.chdir(d)
+  sys.path.append(d)
   pass
-except NameError:
-  __file__ = '?'
 
-from app import init, application
+from uwiki import init, application
 
 init()
 
+# For best results run with 'python -i driver.wsgi'
+
 if __name__=='__main__':
-  from wsgiref.simple_server import make_server
-  srv = make_server('', 8080, application)
+  srv = make_server('localhost', 8080, application)
+  t = threading.Thread(target=srv.serve_forever)
+  t.daemon = 1
+  t.start()
   print 'Serving port 8080'
-  srv.serve_forever()

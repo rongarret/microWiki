@@ -1,6 +1,8 @@
 
 # Revision Control store
 
+import cPickle as pickle
+
 class rcstore(object):
 
   HTML = 'html'
@@ -22,14 +24,14 @@ class rcstore(object):
   def store(self, name, markdown, html, metadata):
     rev = self.latest_revision(name)
     if rev:
-      old_markdown = self.get(name, rcstore.MARKDOWN)
+      old_markdown = self.get(name, self.MARKDOWN)
       if markdown == old_markdown: return # Don't store content if unchanged
       pass
     rev = rev + 1
-    self.db['%s~%s.%s' % (name, rev, rcstore.MARKDOWN)] = markdown
-    self.db['%s~%s.%s' % (name, rev, rcstore.HTML)] = html
-    self.db['%s~%s.%s' % (name, rev, rcstore.METADATA)] = metadata
-    self.db['%s.%s' % (name, rcstore.REVISION)] = str(rev)
+    self.db['%s~%s.%s' % (name, rev, self.MARKDOWN)] = markdown
+    self.db['%s~%s.%s' % (name, rev, self.HTML)] = html
+    self.db['%s~%s.%s' % (name, rev, self.METADATA)] = pickle.dumps(metadata)
+    self.db['%s.%s' % (name, self.REVISION)] = str(rev)
     pass
 
   pass

@@ -1,6 +1,6 @@
 #!/usr/local/bin/js
 
-load("showdown.js")
+load("static/showdown.js")
 converter = new Showdown.converter();
 var s = ""
 while (line=readline()) { s = s + line }

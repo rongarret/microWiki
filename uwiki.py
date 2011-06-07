@@ -1,34 +1,11 @@
-import config
-from wrappers import standard_wrap, tlp_wrap
-from selector import Selector
+
 from html import *
-from utils import getformslot
-import re, datetime
+from utils import *
+from auth import auth_wrap
+import os, datetime
+import auth, config
 
-s = Selector(wrap=standard_wrap)
-application = tlp_wrap(s)
-s.parser.default_pattern='segment'
-
-import wrappers
-
-def style(thing):
-  return [str(as_html(thing))]
-#  return [unicode(as_html(thing)).decode(config.unicode_encoding)]
-
-wrappers.style = style
-
-def slashify(req):
-  return req.redirect('%s/' % req.environ.get('SCRIPT_NAME'))
-
-def init():
-  s.add('', GET=slashify)
-  s.add('/', GET=start)
-  s.add('/view/{page}', GET=view)
-  s.add('/view/{page}/{revision}', GET=view)
-  s.add('/edit/{page}', GET=edit)
-  s.add('/post/{page}', POST=post)
-  s.add('/static/{file}', GET=static)
-  pass
+from selector import not_found
 
 template = open('uWiki.template').read()
 spath = '/static'
@@ -36,50 +13,100 @@ content_type_header = 'text/html; charset=' + config.unicode_encoding
 helptext = open('markdown-ref.txt').read()  # For inclusion on editing page
 
 import fsdb
-from rcstore import rcstore
+from rcstore import rcstore, pickle
 content = rcstore(fsdb.fsdb(config.content_root))
 
-def static(req):
-  return HTMLString(open(req.environ['selector.vars']['file']).read())
+stylesheet = Tag('link', rel="stylesheet", type="text/css",
+                 href="/static/uwiki.css")
 
+separator = ' | '
+
+def init():
+  try: auth.restore_state()
+  except: auth.save_state()
+  pass
+
+application = app # From utils, should probably not be there
+
+@page('/')
+@stdwrap
 def start(req):
   req.redirect('/view/Start')
 
+@page('/static/{file:any}')
+@Yaro
+@form_wrap  # Can't use stdwrap here because it assumes content type is HTML
+def static(req):
+  filename = getselectorvar('file')
+  # Close a security hole where someone passes a '..' relative
+  # pathname as a url-encoded string
+  if '/' in filename: return req.wsgi_forward(not_found)
+  try:
+    s = open('static/' + getselectorvar('file')).read()
+  except:
+    return req.wsgi_forward(not_found)
+  return [s]
+
+@page('/view/{page}[/{revision}]')
+@stdwrap
+@auth_wrap
 def view(req):
   req.res.headers['Content-type'] = content_type_header
-  name = req.environ['selector.vars']['page']
-  rev = req.environ['selector.vars'].get('revision')
+  name = getselectorvar('page')
+  rev = getselectorvar('revision')
   markdown = content.get(name, rcstore.MARKDOWN, rev)
   html = content.get(name, rcstore.HTML, rev)
   
   if rev:
     # View a particular revision
     if not markdown: return ['%s revision %s not found' % (name, rev)]
-    return ['%s revision %s ' % (name, rev),
-            link('(back)', '/view/%s' % name), HR, HTMLString(html)]
+    return [Tag('b', name), ' revision ', rev, ' | ',
+            link('BACK', '/revs/%s' % name), HR, HTMLString(html)]
 
   # View the latest revision, with options to edit or view previous revs
   if markdown:
-    l = [Tag('link', rel="stylesheet", type="text/css",
-             href="/static/uwiki.css"),
-         name, ' | ', link('EDIT', '/edit/%s' % name)]
+    l = [stylesheet,
+         Tag('b', name), separator,
+         link('EDIT', '/edit/%s' % name)]
     revs = content.latest_revision(name)
     if revs>1:
-      l.append(' | Previous versions: ')
-      l.extend([link(str(i), '/view/%s/%s' % (name, i))
-                for i in range(1, revs)])
+      l.extend([separator, link('OLDER VERSIONS', '/revs/' + name)])
       pass
-    l.append(HR)
-    l.append(HTMLString(html))
-    return HTMLItems(*l)
-  else:
-    # Page not found
-    l = [name, ' not found. ', link('Create it', '/edit/%s' % name)]
-    r = req.environ.get('HTTP_REFERER') or req.environ.get('HTTP_REFERRER')
-    if r: l.append(HTMLItems(' or ', link('cancel', r)))
-    return HTMLItems(*l)
-  pass
+    l.extend([' | ', link('LOGOUT', '/logout'), HR, HTMLString(html)])
+    return l
+  # Page not found
+  r = req.environ.get('HTTP_REFERER') or req.environ.get('HTTP_REFERRER') \
+      or '/'
+  if '~' in name:
+    return ['Illegal Wikilink: ', name,
+            '.  Wikilinks may not containt "~" characters. ',
+            link('BACK', r)]
+  l = [name, ' not found. ', link('CREATE IT', '/edit/%s' % name),
+       ' or ', link('CANCEL', r)]
+  return l
 
+@page('/revs/{page}')
+@stdwrap
+@auth_wrap
+def revs(req):
+  page = getselectorvar('page')
+  revs = content.latest_revision(page)
+  if revs<2: return ['There are no previous versions of this page.']  
+  l = []
+  for rev in xrange(1, revs):
+    mtd = pickle.loads(content.get(page, content.METADATA, rev))
+    l.append(Tag('li', [link(mtd['timestamp'],
+                             '/view/' + page + '/' + str(rev)),
+                        ' by ', mtd['username']]))
+    pass
+  return [Tag('b', ['Older versions of ', page, ': ']),
+          link('[BACK]', '/view/' + page),
+          Tag('ol', l)]
+
+
+@page('/edit/{page}')
+@stdwrap
+@auth_wrap
 def edit(req):
   req.res.headers['Content-type']='text/html'
   name = req.environ['selector.vars']['page']
@@ -87,16 +114,22 @@ def edit(req):
   markdown = content.get(name, rcstore.MARKDOWN) or '# %s\n\nNew page' % name
   d = { 'name' : name, 'md_content' : markdown, 'spath' : spath,
         'base_version' : base_version, 'helptext' : helptext, 'msg' : name }
-  return HTMLString(template % d)
+  return [HTMLString(template % d)]
 
+@page('/post/{page}', ['POST'])
+@stdwrap
+@auth_wrap
 def post(req):
   name = req.environ['selector.vars']['page']
   latest_version = content.latest_revision(name)
   base_version = int(getformslot('base_version'))
   if latest_version != base_version:
     return resolve(name, base_version, latest_version)
-  content.store(name, getformslot('content'), getformslot('html'),
-                str({'timestamp' : datetime.datetime.now()}))
+  u = req.session.user
+  metadata = { 'timestamp' : datetime.datetime.now(),
+               'username' : u.fb_name or u.google_name,
+               'useremail' : u.email }
+  content.store(name, getformslot('content'), getformslot('html'), metadata)
   return req.redirect('/view/%s' % name)
 
 import merge3, StringIO

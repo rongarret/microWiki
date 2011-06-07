@@ -9,4 +9,4 @@ content_root = 'content'
 
 invitation_timeout = 72.0 # In hours
 
-admins = ['ron@flownet.com']
+admins = []

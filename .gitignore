@@ -1,4 +1,4 @@
-syntax: glob
+
 *.o
 *.so
 *.la

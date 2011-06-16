@@ -1,9 +1,8 @@
 
-This is μWiki, a very small but fully functional wiki written by Ron
-Garret.  It is as much an exercise in modular WSGI development as a
-functional product.  The total code base is currently about 3500 lines
-of code, of which only about 150 lines are the wiki proper.  Everything
-else is infrastructure.
+This is μWiki, a very small but fully functional wiki.  It is as much
+an exercise in modular WSGI development as a functional product.  The
+total code base is currently about 3500 lines of code, of which only
+about 150 lines are the wiki proper.  Everything else is infrastructure.
 
 The current code base is the result of a major overhaul that added user
 authorization through Facebook and OpenID (currently hard-coded to use
@@ -12,7 +11,8 @@ easy for someone besides me to install it.  But this is more or less
 what you have to do:
 
 1.  Install a Javascript interpreter at /user/local/bin/js.  Or edit
-md2html appropriately.
+md2html appropriately.  (You will also need a python interpreter, and
+one of several json parsers.  See facebook.py for more detais.)
 
 2.  Edit config.py.  At a minimum you have to install your Facebook
 application ID (if you don't have one you can get one at

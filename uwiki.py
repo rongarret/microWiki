@@ -2,7 +2,7 @@
 from html import *
 from utils import *
 from auth import auth_wrap
-import os, datetime
+import os, sys, datetime
 import auth, config
 
 from selector import not_found
@@ -72,7 +72,9 @@ def view(req):
     if revs>1:
       l.extend([separator, link('OLDER VERSIONS', '/revs/' + name)])
       pass
-    l.extend([' | ', link('LOGOUT', '/logout'), HR, HTMLString(html)])
+    l.extend([separator,
+              link('START', '/start'), separator,
+              link('LOGOUT', '/logout'), HR, HTMLString(html)])
     return l
   # Page not found
   r = req.environ.get('HTTP_REFERER') or req.environ.get('HTTP_REFERRER') \

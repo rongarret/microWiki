@@ -32,10 +32,22 @@ def getselectorvar(v):
   # See http://wsgi.org/wsgi/Specifications/routing_args
   return threadvars.req.environ['wsgiorg.routing_args'][1][v]
 
+# mpath = Munged path, prepend the local applicaiton path
+# This relies on selector.consume_path being set to False
+# If that ever changes, some other way of capturing the application
+# path needs to be provided (e.g. capturing it in a top-level wrap)
+#
+def mpath(path):
+  return threadvars.req.uri.application_uri() + path
+
 def forward(url, delay=0):
-  threadvars.req.redirect(url)
+  threadvars.req.redirect(mpath(url))
 
 from html import *
+
+# Internal link, prepend application path
+def ilink(content, url):
+  return link(content, mpath(url))
 
 def html_wrap(app):
   def wrap(req):
@@ -47,7 +59,7 @@ stdwrap = lambda app: Yaro(html_wrap(form_wrap(app)))
 
 from selector import Selector
 
-app = Selector()
+app = Selector(consume_path=False) # Otherwise SCRIPT_NAME gets screwed up
 
 pages = []
 

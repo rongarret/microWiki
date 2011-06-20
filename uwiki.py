@@ -7,8 +7,12 @@ import auth, config
 
 from selector import not_found
 
+link = ilink
+
 template = open('uWiki.template').read()
-spath = '/static'
+
+spath = mpath('/static')
+
 content_type_header = 'text/html; charset=' + config.unicode_encoding
 helptext = open('markdown-ref.txt').read()  # For inclusion on editing page
 
@@ -17,7 +21,7 @@ from rcstore import rcstore, pickle
 content = rcstore(fsdb.fsdb(config.content_root))
 
 stylesheet = Tag('link', rel="stylesheet", type="text/css",
-                 href="/static/uwiki.css")
+                 href=mpath("/static/uwiki.css"))
 
 separator = ' | '
 
@@ -31,7 +35,7 @@ application = app # From utils, should probably not be there
 @page('/')
 @stdwrap
 def start(req):
-  req.redirect('/view/Start')
+  forward('/view/Start')
 
 @page('/static/{file:any}')
 @Yaro
@@ -60,7 +64,7 @@ def view(req):
   if rev:
     # View a particular revision
     if not markdown: return ['%s revision %s not found' % (name, rev)]
-    return [Tag('b', name), ' revision ', rev, ' | ',
+    return [Tag('b', name), ' revision ', rev, separator,
             link('BACK', '/revs/%s' % name), HR, HTMLString(html)]
 
   # View the latest revision, with options to edit or view previous revs
@@ -132,7 +136,7 @@ def post(req):
                'username' : u.fb_name or u.google_name,
                'useremail' : u.email }
   content.store(name, getformslot('content'), getformslot('html'), metadata)
-  return req.redirect('/view/%s' % name)
+  return forward('/view/%s' % name)
 
 import merge3, StringIO
 

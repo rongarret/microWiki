@@ -72,7 +72,7 @@ function canonicalize_wikilink(link) {
 function process_wikilinks(text) {
   return text.replace(/\[\[(.+?)]]/g, function(whole, m1) {
     link = canonicalize_wikilink(m1);
-    return '<a href=/view/' + link + ">" + m1 + "</a>";
+    return '<a href="../view/' + link + '">' + m1 + '</a>';
   })}
 
 // Tables

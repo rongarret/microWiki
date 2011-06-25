@@ -1,8 +1,8 @@
 
-host = 'localhost:8080'
+# uWiki config file for localhost (port 80)
 
-fb_app_id = '202816686428253'
-fb_secret = 'e764018e308d9299b37993514052789f'
+fb_app_id = '114465591978353
+fb_secret = 'be7a59f9c622eb9bf1ced88817fcda3e'
 
 unicode_encoding = 'utf-8'
 content_root = 'content'

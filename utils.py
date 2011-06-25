@@ -11,9 +11,14 @@ content_type = 'text/html; charset=' + unicode_encoding
 
 threadvars = threading.local()
 
-def form_wrap(app):
+# Set up a standard threadvar environment so we don't have to keep passing
+# REQ around all over the place
+#
+def threadvars_wrap(app):
   def wrap(req):
     threadvars.req = req
+    threadvars.env = req.environ
+    threadvars.tlp = req.environ['SCRIPT_NAME'] # Top Level Path
     threadvars.form = req.query or req.form
     return app(req)
   return wrap
@@ -24,24 +29,22 @@ def getcookie(k):
   c = threadvars.req.cookie.get(k)
   return c.value if c else None
 
-def setcookie(k, v, path='/'):
+def setcookie(k, v, path=None):
   threadvars.req.res.headers.add_header(
-    "Set-cookie", '%s=%s ; path=%s' % (k, v, path))
+    "Set-cookie", '%s=%s ; path=%s' % (k, v, path or threadvars.tlp or '/'))
 
 def getselectorvar(v):
   # See http://wsgi.org/wsgi/Specifications/routing_args
   return threadvars.req.environ['wsgiorg.routing_args'][1][v]
 
 # mpath = Munged path, prepend the local applicaiton path
-# This relies on selector.consume_path being set to False
-# If that ever changes, some other way of capturing the application
-# path needs to be provided (e.g. capturing it in a top-level wrap)
+# Could probably use a better name
 #
 def mpath(path):
-  return threadvars.req.uri.application_uri() + path
+  return threadvars.tlp + path
 
-def forward(url, delay=0):
-  threadvars.req.redirect(mpath(url))
+def forward(url, delay=0, absolute=False):
+  return threadvars.req.redirect(url if absolute else mpath(url))
 
 from html import *
 
@@ -55,11 +58,13 @@ def html_wrap(app):
     return [as_html(app(req))]
   return wrap
 
-stdwrap = lambda app: Yaro(html_wrap(form_wrap(app)))
+stdwrap = lambda app: Yaro(html_wrap(threadvars_wrap(app)))
 
 from selector import Selector
 
-app = Selector(consume_path=False) # Otherwise SCRIPT_NAME gets screwed up
+# consume_path must be false as long as TLP is captured inside Selector
+#
+app = Selector(consume_path=False)
 
 pages = []
 

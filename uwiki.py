@@ -7,23 +7,33 @@ import auth, config
 
 from selector import not_found
 
+# HORRIBLE HACK alert -- this converts ALL links to internal links,
+# which at the moment they all happen to be.  But this should be changed
+# at some point.
+#
 link = ilink
 
 template = open('uWiki.template').read()
 
-spath = mpath('/static')
+separator = ' | '
 
 content_type_header = 'text/html; charset=' + config.unicode_encoding
+
 helptext = open('markdown-ref.txt').read()  # For inclusion on editing page
 
 import fsdb
 from rcstore import rcstore, pickle
 content = rcstore(fsdb.fsdb(config.content_root))
 
-stylesheet = Tag('link', rel="stylesheet", type="text/css",
-                 href=mpath("/static/uwiki.css"))
+# The URL for static content needs to be computed dynamically because
+# don't know our application name until we're called.  This could and
+# probably should be cached, but KISS for now.
+#
+def spath(): return mpath('/static')
 
-separator = ' | '
+def stylesheet():
+  return Tag('link', rel="stylesheet", type="text/css",
+             href=mpath("/static/uwiki.css"))
 
 def init():
   try: auth.restore_state()
@@ -32,6 +42,11 @@ def init():
 
 application = app # From utils, should probably not be there
 
+@page('/foo[/{x:any}]')
+@stdwrap
+def foo(req):
+  return [ilink('foo','/foo'), ' TLP=[', threadvars.tlp, ']']
+
 @page('/')
 @stdwrap
 def start(req):
@@ -39,14 +54,14 @@ def start(req):
 
 @page('/static/{file:any}')
 @Yaro
-@form_wrap  # Can't use stdwrap here because it assumes content type is HTML
+@threadvars_wrap   # No stdwrap because that includes html_wrap
 def static(req):
   filename = getselectorvar('file')
   # Close a security hole where someone passes a '..' relative
   # pathname as a url-encoded string
   if '/' in filename: return req.wsgi_forward(not_found)
   try:
-    s = open('static/' + getselectorvar('file')).read()
+    s = open('static/' + filename).read()
   except:
     return req.wsgi_forward(not_found)
   return [s]
@@ -69,7 +84,7 @@ def view(req):
 
   # View the latest revision, with options to edit or view previous revs
   if markdown:
-    l = [stylesheet,
+    l = [stylesheet(),
          Tag('b', name), separator,
          link('EDIT', '/edit/%s' % name)]
     revs = content.latest_revision(name)
@@ -83,9 +98,9 @@ def view(req):
   # Page not found
   r = req.environ.get('HTTP_REFERER') or req.environ.get('HTTP_REFERRER') \
       or '/'
-  if '~' in name:
+  if '~' in name or '/' in name:
     return ['Illegal Wikilink: ', name,
-            '.  Wikilinks may not containt "~" characters. ',
+            '.  Wikilinks may not containt "~" or "/" characters. ',
             link('BACK', r)]
   l = [name, ' not found. ', link('CREATE IT', '/edit/%s' % name),
        ' or ', link('CANCEL', r)]
@@ -118,7 +133,7 @@ def edit(req):
   name = req.environ['selector.vars']['page']
   base_version = content.latest_revision(name)
   markdown = content.get(name, rcstore.MARKDOWN) or '# %s\n\nNew page' % name
-  d = { 'name' : name, 'md_content' : markdown, 'spath' : spath,
+  d = { 'name' : name, 'md_content' : markdown, 'spath' : spath(),
         'base_version' : base_version, 'helptext' : helptext, 'msg' : name }
   return [HTMLString(template % d)]
 
@@ -165,7 +180,7 @@ def resolve(name, base_version, latest_version):
     start_marker='\n!!!--Conflict--!!!\n!--Your version--',
     mid_marker='\n!--Other version--',
     end_marker='\n!--End conflict--\n'))
-  d = { 'name' : name, 'md_content' : merged, 'spath' : spath,
+  d = { 'name' : name, 'md_content' : merged, 'spath' : spath(),
         'base_version' : latest_version, 'helptext' : helptext,
         'msg' : conflict_msg if conflicts else merge_msg }
   return HTMLString(template % d)

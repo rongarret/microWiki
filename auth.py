@@ -84,7 +84,7 @@ fb_preamble = '''
 
   function fb_login() {
     FB.login(function(response) {
-      if (response.session) { document.location='/check_fb_auth' }
+      if (response.session) { document.location='check_fb_auth' }
       else { alert("Login cancelled"); }
     })
   }
@@ -128,7 +128,7 @@ def check_cookie(req):
   if not session_id:
     setcookie('session', make_session_id())
     return ['Cookies are required.  Please enable cookies and ',
-            link('try again', '/'+cont)]
+            ilink('try again', '/'+cont)]
   if not getsession(session_id):
     sessions[session_id] = Session(session_id)
     save_state()
@@ -160,7 +160,7 @@ def lost_session(req):
   sessions[session_id] = Session(session_id)
   save_state()
   return ['''Your login session has timed out.   Please ''',
-          link('log in again.', '/login')]
+          ilink('log in again.', '/login')]
 
 def auth_wrap(app):
   def wrap(req):
@@ -220,7 +220,7 @@ def check_google_auth(req):
   url = 'https://www.google.com/accounts/o8/ud?' + urllib.urlencode(d)
   valid = prefix_equal(urlget(url), 'is_valid:true')
   if not valid:
-    return ['Invalid login.', link('Try again', '/login')]
+    return ['Invalid login.', ilink('Try again', '/login')]
   uid = getformslot('openid.identity')
   user = find_google_user(uid)
   if user:
@@ -311,7 +311,7 @@ def show_users(req):
   names.sort()
   for name in names:
     wikilink = '/view/' + ''.join([s.capitalize() for s in name.split()])
-    l.append(Tag('li', link(name, wikilink)))
+    l.append(Tag('li', ilink(name, wikilink)))
     pass
   return [Tag('h1', 'μWiki registered users'), Tag('ul', l)]
 

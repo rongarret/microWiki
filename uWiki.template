@@ -27,7 +27,7 @@
 	
 	<h2 class=uwiki>Input:</h2>
 	
-	<form action=/post/%(name)s method=POST>
+	<form action=../post/%(name)s method=POST>
 	  <textarea name="content" id="inputPane" cols="70"
 		    rows="20">%(md_content)s</textarea>
 	  <br />

@@ -15,6 +15,8 @@ invitations = {}
 sessions = {}
 users = []
 
+login_banner = HTMLString('<center><br><br><h1>Welcome!</h1><br><br>')
+
 # This probably needs a lock
 def save_state():
   with open(content_root + '/_userstate_', 'w') as f:
@@ -297,12 +299,14 @@ def login(req):
   fb_button = Button('Log in with Facebook', 'fb_login()')
   if fb_app_id == '...': fb_button = '[Facebook login not configured]'
 
+  google_button = Form([HiddenInput(k,v) for (k,v) in openid_items],
+                       submit='Log in with Google',
+                       url="https://www.google.com/accounts/o8/ud")
+  
   return [HTMLString(fb_preamble),
-          HTMLString('<center>Welcome to μWiki.<br>'),
-          fb_button, BR,
-          Form([HiddenInput(k,v) for (k,v) in openid_items],
-               submit='Log in with Google',
-               url="https://www.google.com/accounts/o8/ud"),
+          login_banner,
+          fb_button,
+          google_button,
           HTMLString('</body>')]
 
 @page('/users')

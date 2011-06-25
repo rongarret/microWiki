@@ -1,3 +1,4 @@
+# coding: utf-8
 
 from html import *
 from utils import *
@@ -20,6 +21,9 @@ separator = ' | '
 content_type_header = 'text/html; charset=' + config.unicode_encoding
 
 helptext = open('markdown-ref.txt').read()  # For inclusion on editing page
+
+auth.login_banner = HTMLString(
+  '<center><br><br><h1>Welcome to μWiki!</h1><br><br>')
 
 import fsdb
 from rcstore import rcstore, pickle

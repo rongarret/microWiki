@@ -49,7 +49,11 @@ application = app # From utils, should probably not be there
 @page('/foo[/{x:any}]')
 @stdwrap
 def foo(req):
-  return [ilink('foo','/foo'), ' TLP=[', threadvars.tlp, ']']
+  return [ilink('foo','/foo'), ' TLP=[', threadvars.tlp, ']', BR,
+          req.uri(), BR,
+          req.uri.path, BR,
+          req.uri.application_uri(), BR,
+          '[%s]' % req.uri.script]
 
 @page('/')
 @stdwrap

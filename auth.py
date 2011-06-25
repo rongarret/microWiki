@@ -172,9 +172,11 @@ def auth_wrap(app):
 
 def admin_wrap(app):
   def wrap(req):
-    if not req.session.user.email in admins: return forward('/unauth')
-    return app(req)
-  return auth_wrap(wrap)  
+    if not admins: return app(req)
+    if not req.session.user: return forward('/login')
+    if req.session.user.email in admins: return app(req)
+    return forward('/unauth')
+  return session_wrap(wrap)  
 
 @page('/check_fb_auth')
 @stdwrap
@@ -345,18 +347,14 @@ import re
 email_re = re.compile(r"^[a-zA-Z0-9._%-+]+\@[a-zA-Z0-9._%-]+\.[a-zA-Z]{2,}$")
 
 invitation_email = '''To: %(addr)s
-From: Sunfire Wiki <noreply@sunfire-offices.com>
-Subject: Join the Sunfire wiki
+From: μWiki
+Subject: Try μWiki
 
-You are cordially invited to try the new Sunfire wiki.  Follow this link
+You are cordially invited to try μWiki.  Follow this link
 
 %(url)s
 
 to set up your account.
-
-Note that the wiki is still in beta test, although at this point it
-should be relatively stable.  Please report any problem you encounter
-to Ron Garret at ron@flownet.com.
 '''
 
 @page('/invite', ['GET', 'POST'])
@@ -367,12 +365,14 @@ def invite(req):
   email = ti.value()
   if email and email_re.match(email):
     send_invitation(req, email)
-    return ['Invitation sent.']
-  return ['Send an invitation email to: ', Form([ti])]
+    return ['Invitation sent.', ilink("Send another", '/invite')]
+  msg = 'NOTE: No admins configured.  This wiki is not secure.'
+  if admins: msg = ''
+  return [msg, BR, Form(['Send an invitation email to:', ti])]
 
 def send_invitation(req, addr):
   id = make_session_id()
-  url = req.uri('/register/' + id)
+  url = req.uri(mpath('/register/' + id))
   invitations[id] = Invitation(id, addr)
   save_state()
   send_email(invitation_email % { 'addr' : addr, 'url' : url },  addr)

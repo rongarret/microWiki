@@ -340,7 +340,7 @@ class Form():
 
   def render(self):
     print '<form method="%s" action="%s">' % \
-          (self.method, self.url or threadvars.req.uri.script)
+          (self.method, self.url or threadvars.req.uri())
     for i in self.items: print as_html(i)
     print self.submit.as_html()
     print '</form>'

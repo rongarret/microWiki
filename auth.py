@@ -282,20 +282,24 @@ def login(req):
     ('openid.return_to', req.uri('check_google_auth')),
     ('openid.mode', 'checkid_setup'),
     ('openid.ns.pape', 'http://specs.openid.net/extensions/pape/1.0'),
+# Uncomment to force fresh login every time
 #    ('openid.pape.max_auth_age', '0'),
     ('openid.ns.ax', 'http://openid.net/srv/ax/1.0'),
     ('openid.ax.mode', 'fetch_request'),
     ('openid.ax.required', 'firstname,lastname'),
+# Uncomment to get the Google email address
 #    ('openid.ax.required', 'email,firstname,lastname'),
 #    ('openid.ax.type.email', 'http://schema.openid.net/contact/email'),
     ('openid.ax.type.firstname', 'http://axschema.org/namePerson/first'),
     ('openid.ax.type.lastname', 'http://axschema.org/namePerson/last')
     ]
 
+  fb_button = Button('Log in with Facebook', 'fb_login()')
+  if fb_app_id == '...': fb_button = '[Facebook login not configured]'
+
   return [HTMLString(fb_preamble),
           HTMLString('<center>Welcome to μWiki.<br>'),
-          Button('Log in with Facebook', 'fb_login()'),
-          BR,
+          fb_button, BR,
           Form([HiddenInput(k,v) for (k,v) in openid_items],
                submit='Log in with Google',
                url="https://www.google.com/accounts/o8/ud"),

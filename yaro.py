@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 """yaro - Yet Another Request Object (for WSGI)
 
 A simple but non-restrictive abstraction of WSGI for end users.
@@ -69,7 +69,7 @@ class URI(object):
         or generating forms or links or other URI related things.
         """
         if path is None:
-            path = self.path
+            return self.application_uri() + self.path
         if path == '':
             uri = self.application_uri()
         elif path[0:1] != '/':

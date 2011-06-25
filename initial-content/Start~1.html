@@ -1,0 +1,52 @@
+<h1>Welcome</h1>
+
+<p>Welcome to µWiki.  You might want to start by looking at the
+<a href="../view/SyntaxGuide">syntax guide</a> or creating a <a href="../view/TestPage">test page</a>.</p>
+
+
+<h2>About</h2>
+
+<p>µWiki is a very small (~200 LOC) but (mostly) fully functional wiki.  It makes
+heavy use of third-party code to provide most of its functionality, including:</p>
+
+
+<ul>
+<li><a href="http://lukearno.com/projects/yaro/">Yaro</a></li>
+<li><a href="http://lukearno.com/projects/selector/">Selector</a></li>
+<li>Showdown (The µWiki UI is lifted more or less directly from Showdown.)</li>
+<li><a href="http://bazaar-vcs.org/">Bazaar</a> for some of the version control code.</li>
+</ul>
+
+<p>This is a beta-test version.  It seems to mostly work, but it might have
+some issues with a few corner cases.  Also, the code could use a lot of
+cleanup and documentation.</p>
+
+
+<p>Since much of the code in µWiki is third-party code it is available
+under the terms of those respective licenses.  The code that
+I wrote is hereby released under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT open-source
+license</a>.</p>
+
+
+<p>Comments and feedback are welcome.  Please send them to <a href="&#x6D;a&#105;&#108;&#116;&#x6F;:&#x72;&#111;&#110;&#x40;&#x66;&#108;&#x6F;&#119;&#110;&#x65;&#x74;&#46;&#x63;&#x6F;&#x6D;">&#x72;&#111;&#110;&#x40;&#x66;&#108;&#x6F;&#119;&#110;&#x65;&#x74;&#46;&#x63;&#x6F;&#x6D;</a></p>
+
+
+<p>Changes since version 0.1:</p>
+
+
+<ul>
+<li>µWiki no longer uses markdown.py.  All markdown-to-HTML conversion is now
+done in Javascript on the client side using Showdown.  This is to avoid having
+to keep two different versions of the syntax synchronized.</li>
+<li>Revision control has been added.  It does proper conflict detection using
+Bazaar's merge3 algorithm.</li>
+</ul>
+
+<p>Changes since version 0.2:</p>
+
+
+<ul>
+<li>User logins have been added.  μWiki is now a fully industrial-strength
+wiki, but still only about 3500 LOC <em>total</em>!  The wiki code itself
+(not counting infrastructure) is only 155 LOC.</li>
+</ul>

@@ -1,5 +1,5 @@
 
-host = 'localhost:8080'
+# uWiki config file for localhost:8080
 
 fb_app_id = '202816686428253'
 fb_secret = 'e764018e308d9299b37993514052789f'

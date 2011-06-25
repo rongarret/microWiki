@@ -1,6 +1,4 @@
 
-host = 'localhost:8080'
-
 # Insert your facebook app id and secret here.  If you don't have
 # a FB app id you can get one at http://developers.facebook.com/setup/
 #

@@ -12,4 +12,4 @@ invitation_timeout = 72.0 # In hours
 
 # Emal addresses of people who will be able to send invitations
 #
-admins = []
+admins = ['ron@awun.net']

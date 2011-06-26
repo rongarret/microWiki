@@ -31,6 +31,8 @@ class rcstore(object):
     self.db['%s~%s.%s' % (name, rev, self.MARKDOWN)] = markdown
     self.db['%s~%s.%s' % (name, rev, self.HTML)] = html
     self.db['%s~%s.%s' % (name, rev, self.METADATA)] = pickle.dumps(metadata)
+    # In case the rev file was created by a different user
+    del self.db['%s.%s' % (name, self.REVISION)]
     self.db['%s.%s' % (name, self.REVISION)] = str(rev)
     pass
 

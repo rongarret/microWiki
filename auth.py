@@ -103,10 +103,11 @@ fb_preamble = '''
   </script>
 ''' % {'fb_app_id' : fb_app_id}
 
+# Add a prefix to the current URL, preserving the application component
 def add_path_prefix(req, prefix):
   uri = req.uri()
   host = req.uri.server_uri()
-  return prefix + uri[len(host):]
+  return mpath(prefix + uri[len(host):])
 
 def session_wrap(app):
   def wrap(req):
@@ -141,15 +142,15 @@ def check_cookie(req):
 @page('/check_javascript/{cont:any}')
 @stdwrap
 def root(req):
-  cont = getselectorvar('cont')
+  cont = '/' + getselectorvar('cont')
   return [HTMLString('''
   <html>
-  <body onload='document.location="/%(cont)s"'>
+  <body onload='document.location="%s"'>
   <noscript>Javascript is required.  Please enable Javascript and
-  <a href=/check_javascript/%(cont)s>try again</a>.</noscript>
+  <a href="%s">try again</a>.</noscript>
   </body>
   </html>
-  ''' % {'cont' : cont})]
+  ''' % (mpath(cont), mpath('/check_javascript' + cont)))]
 
 @page('/lost_session')
 @stdwrap
@@ -347,7 +348,7 @@ import re
 email_re = re.compile(r"^[a-zA-Z0-9._%-+]+\@[a-zA-Z0-9._%-]+\.[a-zA-Z]{2,}$")
 
 invitation_email = '''To: %(addr)s
-From: μWiki
+From: μWiki <μwiki@localhost>
 Subject: Try μWiki
 
 You are cordially invited to try μWiki.  Follow this link
@@ -357,7 +358,7 @@ You are cordially invited to try μWiki.  Follow this link
 to set up your account.
 '''
 
-@page('/invite', ['GET', 'POST'])
+@page('/invite')
 @stdwrap
 @admin_wrap
 def invite(req):
@@ -383,3 +384,41 @@ def find_invitation(email):
     if invite.email==email: return invite
     pass
   return None
+
+import getpass, config
+
+@page('/setup')
+@stdwrap
+def setup(req):
+
+  unix_user = getpass.getuser()
+  
+  # Try to create the _userstate_ file if it doesn't exist
+  try: restore_state()
+  except:
+    try: save_state()
+    except: pass
+    pass
+
+  # See if we succeeded
+  try: restore_state()
+  except: return [
+    'Could not read user configuration data.  Please make sure that user ',
+    unix_user, ' has read and write access to the ',
+    config.content_root, ' directory.']
+  try: save_state()
+  except: return[
+    'Could not write user configuration data.  Please make sure that user ',
+    unix_user, ' has read and write access to the ',
+    config.content_root, ' directory.']
+
+  # All good, ready to rock and roll
+  if not admins: req.redirect('invite')
+  
+  if not invitations:
+    for a in admins:
+      send_invitation(req, a)
+      pass
+    return ['Initial invitations sent.']
+
+  return ['This wiki has already been set up.']

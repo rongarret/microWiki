@@ -10,27 +10,22 @@ Google, but that's easy to change).  Some more work is needed to make it
 easy for someone besides me to install it.  But this is more or less
 what you have to do:
 
-1.  Install a Javascript interpreter at /user/local/bin/js.  Or edit
-md2html appropriately.  (You will also need a python interpreter, and
-one of several json parsers.  See facebook.py for more detais.)
+1.  Make a copy of initial-content.  If you are going to run μWiki
+under a web server running as some other user then you also need to
+give appropriate write permissions into the content directory.
 
-2.  Edit config.py.  At a minimum you have to install your Facebook
-application ID (if you don't have one you can get one at
-http://developers.facebook.com/setup/) and at least one email address
-in the admins variable.
+2.  Edit config.py.  At a minimum you have to set content_root to
+point to whereever you put your copy of initial_content.  You should
+also install your Facebook application ID (if you don't have one you
+can get one at http://developers.facebook.com/setup/) and at least one
+email address in the admins variable.
 
-3.  Run ./init.py
-
-This will produce an invitation ID which you will need to generate
-the initial user account.
-
-4.  Start μWiki.  To run locally: python -i driver.wsgi.  To run under
+3.  Start μWiki.  To run locally: python -i driver.wsgi.  To run under
 a server, make sure your content directory has appropriate privileges
 set, and point a WSGIScriptAlias (or whatever your server uses) to
 driver.wsgi.
 
-5.  Visit the URL generated in step 2 to set up the initial user account.
-
-6.  To generate more user invitations, go to http://[your server]/invite
+4.  Point your browser at whatever URL you are running at and follow the
+directions there to complete the setup process.
 
 Send comments, questions and bug reports to ron@flownet.com

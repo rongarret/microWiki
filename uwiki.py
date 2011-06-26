@@ -97,10 +97,6 @@ def view(req):
   # Page not found
   r = req.environ.get('HTTP_REFERER') or req.environ.get('HTTP_REFERRER') \
       or '/'
-  if '~' in name or '/' in name:
-    return ['Illegal Wikilink: ', name,
-            '.  Wikilinks may not containt "~" or "/" characters. ',
-            link('BACK', r)]
   l = [name, ' not found. ', link('CREATE IT', '/edit/%s' % name),
        ' or ', link('CANCEL', r)]
   return l

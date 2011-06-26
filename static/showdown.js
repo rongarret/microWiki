@@ -66,6 +66,7 @@ function canonicalize_wikilink(link) {
   link = link.replace(/\S+/g, function(a){
     return a.charAt(0).toUpperCase() + a.slice(1);
   })
+  link = link.replace(/[/~@.]/, '_')
   return link.split(/ +/).join('');
 }
 

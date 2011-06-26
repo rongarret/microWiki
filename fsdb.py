@@ -38,7 +38,7 @@ class fsdb(object):
     pass
 
   def __delitem__(self, key):
-    os.remove(self.path(key))
+    if self.has_key(key): os.remove(self.path(key))
   
   def has_key(self, key):
     return os.path.exists(self.path(key))

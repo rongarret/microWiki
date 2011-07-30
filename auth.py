@@ -254,6 +254,18 @@ def check_google_auth(req):
   forward('/start')
   return
 
+@page('/check_dssid_auth')
+@stdwrap
+@session_wrap
+def check_dssid_auth(req):
+  url = 'https://secure.dswi.net/dssid/verify?sid=' + getformslot('session_id')
+  if urlget(url)!='valid':
+    return ['Invalid login.', ilink('Try again', '/login')]
+
+  # More stuff goes here
+  
+  return
+
 @page('/unauth')
 @stdwrap
 def unauth(req):
@@ -305,11 +317,16 @@ def login(req):
   google_button = Form([HiddenInput(k,v) for (k,v) in openid_items],
                        submit='Log in with Google',
                        url="https://www.google.com/accounts/o8/ud")
+
+  dssid_button = Form([HiddenInput('url', req.uri('check_dssid_auth'))],
+                      submit='Log in with DSSID',
+                      url='https://secure.dswi.net/wsgi2/auth')
   
   return [HTMLString(fb_preamble),
           login_banner,
           fb_button,
           google_button,
+          dssid_button,
           HTMLString('</body>')]
 
 @page('/users')

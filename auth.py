@@ -258,7 +258,7 @@ def check_google_auth(req):
 @stdwrap
 @session_wrap
 def check_dssid_auth(req):
-  url = 'https://secure.dswi.net/dssid/verify?sid=' + getformslot('session_id')
+  url = dssid_base_url + '/verify?sid=' + getformslot('sid')
   if urlget(url)!='valid':
     return ['Invalid login.', ilink('Try again', '/login')]
 
@@ -318,9 +318,11 @@ def login(req):
                        submit='Log in with Google',
                        url="https://www.google.com/accounts/o8/ud")
 
+  dssid_base_url = 'https://secure.dswi.net/wsgi2'  # Should be in config?
+
   dssid_button = Form([HiddenInput('url', req.uri('check_dssid_auth'))],
                       submit='Log in with DSSID',
-                      url='https://secure.dswi.net/wsgi2/auth')
+                      url = dssid_base_url + '/auth')
   
   return [HTMLString(fb_preamble),
           login_banner,

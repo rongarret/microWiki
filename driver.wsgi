@@ -5,7 +5,6 @@ from wsgiref.simple_server import make_server
 
 if __name__!='__main__':
   d=os.path.dirname(__file__)
-  os.chdir(d)
   sys.path.append(d)
   pass
 

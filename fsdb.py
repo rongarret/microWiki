@@ -82,7 +82,7 @@ class sddb(object):
     return self.db.close()
   
   def get(self, key):
-    return self.db.get(key)
+    return self[key] if self.has_key(key) else None
   
   pass
 

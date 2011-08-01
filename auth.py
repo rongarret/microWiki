@@ -18,7 +18,7 @@ def store_user(user):
   pass
 
 def get_users():
-  return [pickle.loads(s) for s in users.keys()]
+  return [pickle.loads(s) for s in users_db.keys()]
 
 # Vestige of an earlier horrible hack, should be gotten rid of
 users = []

@@ -10,7 +10,7 @@ from forms import *
 from config import *
 
 import anydbm
-from cPickle import pickle
+import cPickle as pickle
 users_db = anydbm.open('uwiki_users', 'c')
 
 def store_user(user):

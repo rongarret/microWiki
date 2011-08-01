@@ -9,27 +9,33 @@ from utils import *
 from forms import *
 from config import *
 
-import cPickle as pickle
+import anydbm
+from cPickle import pickle
+users_db = anydbm.open('uwiki_users', 'c')
 
-invitations = {}
-sessions = {}
+def store_user(user):
+  users_db[pickle.dumps(user)]=''
+  pass
+
+def get_users():
+  return [pickle.loads(s) for s in users.keys()]
+
+# Vestige of an earlier horrible hack, should be gotten rid of
 users = []
+def restore_state():
+  global users
+  users = get_users()
+  pass
+
+from fsdb import pdb
+
+invitations = pdb(anydbm.open('uwiki_invitations', 'c'))
+sessions = pdb(anydbm.open('uwiki_sessions', 'c'))
 
 login_banner = HTMLString('<center><br><br><h1>Welcome!</h1><br><br>')
 
-# This probably needs a lock
-def save_state():
-  with open(content_root + '/_userstate_', 'w') as f:
-    pickle.dump((users,sessions,invitations), f)
-    pass
-  pass
-
-def restore_state():
-  global users,sessions,invitations
-  with open(content_root + '/_userstate_') as f:
-    (users,sessions,invitations) = pickle.load(f)
-    pass
-  pass
+# This should probably be in config
+dssid_base_url = 'https://secure.dswi.net/wsgi2'
 
 def getsession(session_id):
   return sessions.get(session_id)
@@ -55,12 +61,16 @@ class Session(object):
     return
   pass
 
+# This could use some refactoring
+
 class User(object):
   def __init__(self):
     self.fb_name = None
     self.fb_uid = None
     self.google_name = None
     self.google_uid = None
+    self.dssid_uid = None
+    self.dssid_name = None
     self.email = None
     return
   pass
@@ -74,6 +84,12 @@ def find_fb_user(fb_uid):
 def find_google_user(google_uid):
   for u in users:
     if u.google_uid==google_uid: return u
+    pass
+  return None
+
+def find_dssid_user(dssid_uid):
+  for u in users:
+    if u.dssid_uid==dssid_uid: return u
     pass
   return None
 
@@ -134,7 +150,6 @@ def check_cookie(req):
             ilink('try again', '/'+cont)]
   if not getsession(session_id):
     sessions[session_id] = Session(session_id)
-    save_state()
     pass
   forward('/'+cont)
   return
@@ -161,7 +176,6 @@ def lost_session(req):
     forward('/cookie_test/lost_session')
     return
   sessions[session_id] = Session(session_id)
-  save_state()
   return ['''Your login session has timed out.   Please ''',
           ilink('log in again.', '/login')]
 
@@ -205,12 +219,11 @@ def check_fb_auth(req):
       return ['Sorry, your invitation has expired.']
     user = User()
     user.email = invitations[req.session.invitation_id].email
-    users.append(user)
     req.session.user = user
     pass
   user.fb_uid = uid
   user.fb_name = userinfo['name']
-  save_state()
+  store_user(user)
   forward('/start')
   return
 
@@ -245,12 +258,11 @@ def check_google_auth(req):
       return ['Sorry, your invitation has expired.']
     user = User()
     user.email = invitations[req.session.invitation_id].email
-    users.append(user)
     req.session.user = user
     pass
   user.google_uid = uid
   user.google_name = name
-  save_state()
+  store_user(user)
   forward('/start')
   return
 
@@ -259,11 +271,33 @@ def check_google_auth(req):
 @session_wrap
 def check_dssid_auth(req):
   url = dssid_base_url + '/verify?sid=' + getformslot('sid')
-  if urlget(url)!='valid':
-    return ['Invalid login.', ilink('Try again', '/login')]
-
-  # More stuff goes here
-  
+  s = urlget(url)
+  if s != 'valid':
+    return ['Invalid login.', BR, url, BR, s]
+  uid = getformslot('uid')
+  user = find_dssid_user(uid)
+  if user:
+    # Already registered
+    req.session.user = user
+    forward('/start')
+    return
+  if not req.session.invitation_id:
+    # Not registered, not invited
+    forward('/unauth')
+    return
+  # Set up a new user
+  name = getformslot('name')
+  if not user:
+    if not invitations.has_key(req.session.invitation_id):
+      return ['Sorry, your invitation has expired.']
+    user = User()
+    user.email = invitations[req.session.invitation_id].email
+    req.session.user = user
+    pass
+  user.dssid_uid = uid
+  user.dssid_name = name
+  store_user(user)
+  forward('/start')  
   return
 
 @page('/unauth')
@@ -317,8 +351,6 @@ def login(req):
   google_button = Form([HiddenInput(k,v) for (k,v) in openid_items],
                        submit='Log in with Google',
                        url="https://www.google.com/accounts/o8/ud")
-
-  dssid_base_url = 'https://secure.dswi.net/wsgi2'  # Should be in config?
 
   dssid_button = Form([HiddenInput('url', req.uri('check_dssid_auth'))],
                       submit='Log in with DSSID',
@@ -394,47 +426,18 @@ def send_invitation(req, addr):
   id = make_session_id()
   url = req.uri(mpath('/register/' + id))
   invitations[id] = Invitation(id, addr)
-  save_state()
   send_email(invitation_email % { 'addr' : addr, 'url' : url },  addr)
   return
-
-def find_invitation(email):
-  for (id, invite) in invitations.items():
-    if invite.email==email: return invite
-    pass
-  return None
-
-import getpass, config
 
 @page('/setup')
 @stdwrap
 def setup(req):
 
-  unix_user = getpass.getuser()
+  restore_state()
   
-  # Try to create the _userstate_ file if it doesn't exist
-  try: restore_state()
-  except:
-    try: save_state()
-    except: pass
-    pass
-
-  # See if we succeeded
-  try: restore_state()
-  except: return [
-    'Could not read user configuration data.  Please make sure that user ',
-    unix_user, ' has read and write access to the ',
-    config.content_root, ' directory.']
-  try: save_state()
-  except: return[
-    'Could not write user configuration data.  Please make sure that user ',
-    unix_user, ' has read and write access to the ',
-    config.content_root, ' directory.']
-
-  # All good, ready to rock and roll
   if not admins: req.redirect('invite')
   
-  if not invitations:
+  if len(invitations)==0:
     for a in admins:
       send_invitation(req, a)
       pass

@@ -6,17 +6,16 @@
 # will work anywhere.
 #
 
-from __future__ import with_statement
-
 import os, os.path
 
 class fsdb(object):
-
+  
   def __repr__(self):
     return '<fsdb at %s>' % self.rootpath
 
-  def __init__(self, rootpath, create=False):
+  def __init__(self, rootpath, create=False, serializer=None):
     self.rootpath = rootpath
+    self.serializer = serializer  # A tuple (serializer, deserializer)
     if not os.path.exists(rootpath) and create: os.makedirs(rootpath)
     pass
 
@@ -26,13 +25,16 @@ class fsdb(object):
   def __getitem__(self, key):
     if self.has_key(key):
       with open(self.path(key)) as f:
-        return f.read()
+        r = f.read()
+        if self.serializer: r = self.serializer[1](r)
+        return r
       pass
     else: raise KeyError, key
     pass
   
   def __setitem__(self, key, value):
     with open(self.path(key), 'w') as f:
+      if self.serializer: value = self.serializer[0](value)
       f.write(value)
       pass
     pass
@@ -51,29 +53,42 @@ class fsdb(object):
   
   pass
 
-
-# Like fsdb except that it pickles its contents so it can store any
-# object, not just strings
-#
-
-import cPickle as pickle
-
-class pfsdb(fsdb):
-
+# Wrap a dbm-style db with a serializer/deserializer
+class sddb(object):
+  
+  def __init__(self, db, serializer, deserializer):
+    self.db = db
+    self.serializer = serializer
+    self.deserializer = deserializer
+    pass
+  
   def __getitem__(self, key):
-    if self.has_key(key):
-      with open(self.path(key)) as f:
-        return pickle.load(f)
-      pass
-    else: raise KeyError, key
-    pass
-
+    return self.deserializer(self.db[key])
+  
   def __setitem__(self, key, value):
-    with open(self.path(key), 'w') as f:
-      pickle.dump(value, f)
-      pass
+    self.db[key] = self.serializer(value)
     pass
-
+  
+  def __delitem__(self, key):
+    del self.db[key]
+  
+  def has_key(self, key):
+    return self.db.has_key(key)
+  
+  def keys(self):
+    return self.db.keys()
+  
+  def close(self):
+    return self.db.close()
+  
+  def get(self, key):
+    return self.db.get(key)
+  
   pass
 
-    
+# PDB - dbm database with pickle as a serializer
+
+import cPickle
+
+def pdb(db):
+  return sddb(db, cPickle.dumps, cPickle.loads)

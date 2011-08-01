@@ -1,9 +1,8 @@
-
 *.o
 *.so
 *.la
 *.pyc
-*~
 .DS_Store
-content
+data/content
+scripts/push
 old

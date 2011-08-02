@@ -26,7 +26,7 @@ def get_users():
 login_banner = HTMLString('<center><br><br><h1>Welcome!</h1><br><br>')
 
 # This should probably be in config
-dssid_base_url = 'https://secure.dswi.net/wsgi2'
+dssid_base_url = 'https://secure.dswi.net/dssid'
 
 def getsession(session_id):
   return sessions.get(session_id)
@@ -356,7 +356,8 @@ def login(req):
                        submit='Log in with Google',
                        url="https://www.google.com/accounts/o8/ud")
 
-  dssid_button = Form([HiddenInput('url', req.uri('check_dssid_auth'))],
+  dssid_button = Form([HiddenInput('url', req.uri('check_dssid_auth')),
+                       HiddenInput('ri', 'name')],
                       submit='Log in with DSSID',
                       url = dssid_base_url + '/auth')
   

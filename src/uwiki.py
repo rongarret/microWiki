@@ -61,7 +61,7 @@ def static(req):
   # pathname as a url-encoded string
   if '/' in filename: return req.wsgi_forward(not_found)
   try:
-    s = open(data_root + '/static/' + filename).read()
+    s = open(config.data_root + '/static/' + filename).read()
   except:
     return req.wsgi_forward(not_found)
   return [s]
@@ -92,7 +92,7 @@ def view(req):
       l.extend([separator, link('OLDER VERSIONS', '/revs/' + name)])
       pass
     l.extend([separator,
-              link('START', '/start'), separator,
+              link('START PAGE', '/start'), separator,
               link('LOGOUT', '/logout'), HR, HTMLString(html)])
     return l
   # Page not found

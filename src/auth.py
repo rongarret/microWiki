@@ -8,28 +8,20 @@ from forms import *
 from config import *
 
 import dbhash as mydbm
-import cPickle as pickle
-users_db = mydbm.open(data_root + '/wikidata/uwiki_users', 'c')
+from fsdb import pdb
+
+invitations = pdb(mydbm.open(data_root + '/wikidata/invitations.db', 'c'))
+sessions = pdb(mydbm.open(data_root + '/wikidata/sessions.db', 'c'))
+users = pdb(mydbm.open(data_root + '/wikidata/users.db', 'c'))
 
 def store_user(user):
-  users_db[pickle.dumps(user)]=''
-  users_db.sync()
+  users[user.email] = user
+  users.sync()
   pass
 
 def get_users():
-  return [pickle.loads(s) for s in users_db.keys()]
+  return [users[k] for k in users.keys()]
 
-# Vestige of an earlier horrible hack, should be gotten rid of
-users = []
-def restore_state():
-  global users
-  users = get_users()
-  pass
-
-from fsdb import pdb
-
-invitations = pdb(mydbm.open(data_root + '/wikidata/uwiki_invitations', 'c'))
-sessions = pdb(mydbm.open(data_root + '/wikidata/uwiki_sessions', 'c'))
 
 login_banner = HTMLString('<center><br><br><h1>Welcome!</h1><br><br>')
 
@@ -68,30 +60,30 @@ class Session(object):
 
 class User(object):
   def __init__(self):
+    self.email = None
     self.fb_name = None
     self.fb_uid = None
     self.google_name = None
     self.google_uid = None
     self.dssid_uid = None
     self.dssid_name = None
-    self.email = None
     return
   pass
 
 def find_fb_user(fb_uid):
-  for u in users:
+  for u in get_users():
     if u.fb_uid==fb_uid: return u
     pass
   return None
 
 def find_google_user(google_uid):
-  for u in users:
+  for u in get_users():
     if u.google_uid==google_uid: return u
     pass
   return None
 
 def find_dssid_user(dssid_uid):
-  for u in users:
+  for u in get_users():
     if u.dssid_uid==dssid_uid: return u
     pass
   return None
@@ -380,7 +372,7 @@ def login(req):
 @auth_wrap
 def show_users(req):
   l = []
-  names = [u.fb_name or u.google_name for u in users]
+  names = [u.dssid_name or u.google_name or u.fb_name for u in get_users()]
   names = [str(name) for name in names]
   names.sort()
   for name in names:
@@ -447,8 +439,6 @@ def send_invitation(req, addr):
 @stdwrap
 def setup(req):
 
-  restore_state()
-  
   if not admins: req.redirect('invite')
   
   if len(invitations)==0:

@@ -5,8 +5,7 @@
 fb_app_id = '...'
 fb_secret = '...'
 
-unicode_encoding = 'utf-8'
-content_root = 'content'
+data_root = '../data'  # Assuming running driver.wsgi directly
 
 invitation_timeout = 72.0 # In hours
 

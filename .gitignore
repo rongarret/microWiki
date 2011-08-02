@@ -3,6 +3,7 @@
 *.la
 *.pyc
 .DS_Store
-data/content
+data/wikidata
 scripts/push
+src/config.py
 old

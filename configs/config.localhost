@@ -1,11 +1,10 @@
 
 # uWiki config file for localhost (port 80)
 
-fb_app_id = '114465591978353
+fb_app_id = '114465591978353'
 fb_secret = 'be7a59f9c622eb9bf1ced88817fcda3e'
 
-unicode_encoding = 'utf-8'
-content_root = 'content'
+data_root = '../data'
 
 invitation_timeout = 72.0 # In hours
 

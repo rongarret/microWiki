@@ -2,7 +2,7 @@
 
 # Convert old _userstate_ file to anydbm files
 
-import anydbm
+import dbhash as mydbm
 import cPickle as pickle
 
 with open('_userstate_') as f:
@@ -12,14 +12,14 @@ def store_user(user):
   users_db[pickle.dumps(user)]=''
   pass
 
-users_db = anydbm.open('uwiki_users', 'c')
+users_db = mydbm.open('uwiki_users', 'c')
 for u in users: store_user(u)
 users_db.close()
 
-idb = anydbm.open('uwiki_invitations', 'c')
+idb = mydbm.open('uwiki_invitations', 'c')
 for (id, inv) in invitations.items(): idb[id]=pickle.dumps(inv)
 idb.close()
 
-sdb = anydbm.open('uwiki_sessions', 'c')
+sdb = mydbm.open('uwiki_sessions', 'c')
 for (id, s) in sessions.items(): sdb[id]=pickle.dumps(s)
 sdb.close()

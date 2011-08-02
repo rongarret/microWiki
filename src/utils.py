@@ -5,9 +5,8 @@ import threading
 import os
 from cgi import escape as html_escape
 from yaro import Yaro
-from config import unicode_encoding
 
-content_type = 'text/html; charset=' + unicode_encoding
+content_type = 'text/html; charset=utf-8' # The one true encoding
 
 threadvars = threading.local()
 

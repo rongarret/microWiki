@@ -83,7 +83,13 @@ class sddb(object):
   
   def get(self, key):
     return self[key] if self.has_key(key) else None
-  
+
+  def __len__(self):
+    return len(self.db)
+
+  def sync(self):
+    self.db.sync()
+
   pass
 
 # PDB - dbm database with pickle as a serializer

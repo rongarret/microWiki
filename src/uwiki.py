@@ -14,20 +14,21 @@ from selector import not_found
 #
 link = ilink
 
-template = open('uWiki.template').read()
+template = open(config.data_root + '/local/uWiki.template').read()
 
 separator = ' | '
 
-content_type_header = 'text/html; charset=' + config.unicode_encoding
+content_type_header = content_type  # From utils
 
-helptext = open('markdown-ref.txt').read()  # For inclusion on editing page
+# For inclusion on editing page
+helptext = open(config.data_root + '/local/markdown-ref.txt').read()
 
 auth.login_banner = HTMLString(
   '<center><br><br><h1>Welcome to μWiki!</h1><br><br>')
 
 import fsdb
 from rcstore import rcstore, pickle
-content = rcstore(fsdb.fsdb(config.content_root))
+content = rcstore(fsdb.fsdb(config.data_root + '/wikidata/content'))
 
 # The URL for static content needs to be computed dynamically because
 # don't know our application name until we're called.  This could and
@@ -60,7 +61,7 @@ def static(req):
   # pathname as a url-encoded string
   if '/' in filename: return req.wsgi_forward(not_found)
   try:
-    s = open('static/' + filename).read()
+    s = open(data_root + '/static/' + filename).read()
   except:
     return req.wsgi_forward(not_found)
   return [s]

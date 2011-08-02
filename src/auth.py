@@ -1,7 +1,5 @@
 # coding: utf-8
 
-from __future__ import with_statement
-
 import urllib
 import facebook
 import datetime
@@ -9,12 +7,13 @@ from utils import *
 from forms import *
 from config import *
 
-import anydbm
+import dbhash as mydbm
 import cPickle as pickle
-users_db = anydbm.open('uwiki_users', 'c')
+users_db = mydbm.open(data_root + '/wikidata/uwiki_users', 'c')
 
 def store_user(user):
   users_db[pickle.dumps(user)]=''
+  users_db.sync()
   pass
 
 def get_users():
@@ -29,8 +28,8 @@ def restore_state():
 
 from fsdb import pdb
 
-invitations = pdb(anydbm.open('uwiki_invitations', 'c'))
-sessions = pdb(anydbm.open('uwiki_sessions', 'c'))
+invitations = pdb(mydbm.open(data_root + '/wikidata/uwiki_invitations', 'c'))
+sessions = pdb(mydbm.open(data_root + '/wikidata/uwiki_sessions', 'c'))
 
 login_banner = HTMLString('<center><br><br><h1>Welcome!</h1><br><br>')
 
@@ -59,6 +58,10 @@ class Session(object):
     self.user = None
     self.invitation_id = None
     return
+
+  def store(self):
+    sessions[self.id]=self
+    sessions.sync()
   pass
 
 # This could use some refactoring
@@ -150,6 +153,7 @@ def check_cookie(req):
             ilink('try again', '/'+cont)]
   if not getsession(session_id):
     sessions[session_id] = Session(session_id)
+    sessions.sync()
     pass
   forward('/'+cont)
   return
@@ -176,6 +180,7 @@ def lost_session(req):
     forward('/cookie_test/lost_session')
     return
   sessions[session_id] = Session(session_id)
+  sessions.sync()
   return ['''Your login session has timed out.   Please ''',
           ilink('log in again.', '/login')]
 
@@ -203,6 +208,7 @@ def check_fb_auth(req):
   if user:
     # User has already registered
     req.session.user = user
+    req.session.store()
     forward('/start')
     return
   if not req.session.invitation_id:
@@ -220,6 +226,7 @@ def check_fb_auth(req):
     user = User()
     user.email = invitations[req.session.invitation_id].email
     req.session.user = user
+    req.session.store()
     pass
   user.fb_uid = uid
   user.fb_name = userinfo['name']
@@ -244,6 +251,7 @@ def check_google_auth(req):
   if user:
     # User has already registered
     req.session.user = user
+    req.session.store()
     forward('/start')
     return
   if not req.session.invitation_id:
@@ -259,6 +267,7 @@ def check_google_auth(req):
     user = User()
     user.email = invitations[req.session.invitation_id].email
     req.session.user = user
+    req.session.store()
     pass
   user.google_uid = uid
   user.google_name = name
@@ -279,6 +288,7 @@ def check_dssid_auth(req):
   if user:
     # Already registered
     req.session.user = user
+    req.session.store()
     forward('/start')
     return
   if not req.session.invitation_id:
@@ -293,6 +303,7 @@ def check_dssid_auth(req):
     user = User()
     user.email = invitations[req.session.invitation_id].email
     req.session.user = user
+    req.session.store()
     pass
   user.dssid_uid = uid
   user.dssid_name = name
@@ -316,6 +327,7 @@ def start(req):
 @session_wrap
 def logout(req):
   req.session.user = None
+  req.session.store()
   forward('/')
   return
 
@@ -358,9 +370,9 @@ def login(req):
   
   return [HTMLString(fb_preamble),
           login_banner,
-          fb_button,
-          google_button,
           dssid_button,
+          google_button,
+          fb_button,
           HTMLString('</body>')]
 
 @page('/users')
@@ -392,6 +404,7 @@ def register(req):
     forward('/check_javascript/check_cookie/register/'+key)
     return
   session.invitation_id = key
+  session.store()
   forward('/login')
 
 import re
@@ -426,6 +439,7 @@ def send_invitation(req, addr):
   id = make_session_id()
   url = req.uri(mpath('/register/' + id))
   invitations[id] = Invitation(id, addr)
+  invitations.sync()
   send_email(invitation_email % { 'addr' : addr, 'url' : url },  addr)
   return
 

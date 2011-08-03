@@ -4,6 +4,6 @@
 *.pyc
 .DS_Store
 data/wikidata
-scripts/push
+scripts/push*
 src/config.py
 old

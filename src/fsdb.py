@@ -6,6 +6,9 @@
 # will work anywhere.
 #
 
+# Remain backwards-compatible with Python 2.5 for now
+from __future__ import with_statement
+
 import os, os.path
 
 class fsdb(object):

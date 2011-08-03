@@ -203,8 +203,8 @@ def check_fb_auth(req):
     req.session.store()
     forward('/start')
     return
-  if not req.session.invitation_id:
-    # Not registered, not invited
+  if not (req.session.invitation_id or req.session.user):
+    # Not registered, not invited, not logged in
     forward('/unauth')
     return
   # Set up a new user
@@ -246,13 +246,14 @@ def check_google_auth(req):
     req.session.store()
     forward('/start')
     return
-  if not req.session.invitation_id:
-    # Not registered, not invited
+  if not (req.session.invitation_id or req.session.user):
+    # Not registered, not invited, not logged in
     forward('/unauth')
     return
   # Set up a new user
   name = '%s %s' % (getformslot('openid.ext1.value.firstname'),
                     getformslot('openid.ext1.value.lastname'))
+  user = req.session.user
   if not user:
     if not invitations.has_key(req.session.invitation_id):
       return ['Sorry, your invitation has expired.']
@@ -283,12 +284,13 @@ def check_dssid_auth(req):
     req.session.store()
     forward('/start')
     return
-  if not req.session.invitation_id:
-    # Not registered, not invited
+  if not (req.session.invitation_id or req.session.user):
+    # Not registered, not invited, not logged in
     forward('/unauth')
     return
   # Set up a new user
   name = getformslot('name')
+  user = req.session.user
   if not user:
     if not invitations.has_key(req.session.invitation_id):
       return ['Sorry, your invitation has expired.']
@@ -306,7 +308,8 @@ def check_dssid_auth(req):
 @page('/unauth')
 @stdwrap
 def unauth(req):
-  return ['Sorry, you are not an authorized user.']
+  return ['Sorry, you are not an authorized user. ',
+          ilink("Try again", '/login')]
 
 @page('/start')
 @stdwrap

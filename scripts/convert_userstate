@@ -5,24 +5,21 @@
 import sys
 sys.path.append('../src')
 import auth
-
-import dbhash as mydbm
 import cPickle as pickle
 
-uspath = '_userstate_'
+uspath = '/home/ron/uwiki-old/content/_userstate_'
 
 with open(uspath) as f:
-  (users,sessions,invitations) = pickle.load(f)
+  (users, sessions, invitations) = pickle.load(f)
 
 for u in users:
   u.dssid_uid = None
   u.dssid_name = None
   auth.store_user(u)
 
-idb = mydbm.open('invitations.db', 'c')
-for (id, inv) in invitations.items(): idb[id]=pickle.dumps(inv)
-idb.close()
+for (id, inv) in invitations.items():
+  auth.invitations[id] = inv
 
-sdb = mydbm.open('sessions.db', 'c')
-for (id, s) in sessions.items(): sdb[id]=pickle.dumps(s)
-sdb.close()
+for (id, s) in sessions.items():
+  auth.sessions[id] = s
+

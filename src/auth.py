@@ -97,8 +97,13 @@ fb_preamble = '''
 
   function fb_login() {
     FB.login(function(response) {
-      if (response.session) { document.location='check_fb_auth' }
-      else { alert("Login cancelled"); }
+      // As of December 13th, 2011, the JavaScript SDK now only supports OAuth 2.0 for authentication
+      if (response.authResponse) {
+          document.location='check_fb_auth' + '?accessToken=' + response.authResponse.accessToken + '&userID=' + response.authResponse.userID
+      }
+      else { 
+          alert("Login cancelled"); 
+      }
     })
   }
 
@@ -194,8 +199,7 @@ def admin_wrap(app):
 @stdwrap
 @session_wrap
 def check_fb_auth(req):
-  fb_user = facebook.get_user_from_cookie(req.cookie, fb_app_id, fb_secret)
-  uid = fb_user['uid']
+  uid = req.query['userID']
   user = find_fb_user(uid)
   if user:
     # User has already registered
@@ -208,7 +212,7 @@ def check_fb_auth(req):
     forward('/unauth')
     return
   # Set up a new user
-  access_token = fb_user['access_token']
+  access_token = req.query['accessToken']
   graph = facebook.GraphAPI(access_token)
   userinfo = graph.get_object("me")
   user = req.session.user

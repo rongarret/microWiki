@@ -53,8 +53,8 @@ class URI(object):
                 else:
                     self.port = '443'
         else:
-            self.host += environ['SERVER_NAME']
-            self.port += environ['SERVER_PORT']
+            self.host = environ['SERVER_NAME']
+            self.port = environ['SERVER_PORT']
         self.script = environ.get('SCRIPT_NAME', '')
         self.path = environ.get('PATH_INFO', '')
         self.query = environ.get('QUERY_STRING', '')

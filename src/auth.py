@@ -120,10 +120,13 @@ fb_preamble = '''
 ''' % {'fb_app_id' : fb_app_id}
 
 # Add a prefix to the current URL, preserving the application component
+# Normally we would use selector for this, but this is being used by
+# session_wrap which does not have access to selector variables
 def add_path_prefix(req, prefix):
   uri = req.uri()
   host = req.uri.server_uri()
-  return mpath(prefix + uri[len(host):])
+  path = uri[len(host)+len(threadvars.tlp):]
+  return prefix + path
 
 def session_wrap(app):
   def wrap(req):
@@ -142,7 +145,7 @@ def session_wrap(app):
 @page('/check_cookie/{cont:any}')
 @stdwrap
 def check_cookie(req):
-  cont = getselectorvar('cont')
+  cont = '/' + getselectorvar('cont')
   session_id = getcookie('session')
   if not session_id:
     setcookie('session', make_session_id())
@@ -152,7 +155,7 @@ def check_cookie(req):
     sessions[session_id] = Session(session_id)
     sessions.sync()
     pass
-  forward('/'+cont)
+  forward(cont)
   return
 
 @page('/check_javascript/{cont:any}')

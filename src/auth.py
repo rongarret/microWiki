@@ -279,11 +279,12 @@ def check_google_auth(req):
 @stdwrap
 @session_wrap
 def check_dssid_auth(req):
-  url = dssid_base_url + '/verify?sid=' + getformslot('sid')
+  sid = getformslot('sid')
+  uid = getformslot('uid')
+  url = dssid_base_url + '/verify?sid=' + sid + '&uid=' + uid
   s = urlget(url)
   if s != 'valid':
     return ['Invalid login.', BR, url, BR, s]
-  uid = getformslot('uid')
   user = find_dssid_user(uid)
   if user:
     # Already registered
